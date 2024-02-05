@@ -11,3 +11,6 @@ scikit-learn
 requests
 geopandas
 cdsapi
+openmeteo-requests
+requests-cache 
+retry-requests
