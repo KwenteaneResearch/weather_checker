@@ -15,18 +15,16 @@ from sklearn.cluster import KMeans
 
 from weather_checker.params import *
 
-def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:list, raw_storage:str='local'):
+def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ restore_raw_weather_data function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
     
     lat_missing = lat_list.copy()
     lon_missing = lon_list.copy()
-    weight_missing = locations_weights.copy()
-    lat_preloaded = []
-    lon_preloaded = []
-    weight_preloaded = []
-    pre_loaded_data = []
+    loaded = 0
+    
+    pre_loaded_data = pd.DataFrame()
     
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
@@ -35,38 +33,31 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
         for i in range(len(lat_list)):
             lat = round(lat_list[i],4)
             lon = round(lon_list[i],4)
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
+            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             if cache_path.is_file():
-                df = pd.read_csv(cache_path, header=True, index_col="date")
-                print(df.head())
-                data = df.to_dict()
-                print("TO DO : modify index str to datetime")
-                pre_loaded_data.append(data)
-                lat_preloaded.append(lat)
-                lon_preloaded.append(lat)
-                weight_preloaded.append(weight_missing[i])
-                lat_missing.remove(lat)
-                lat_missing.remove(lon)
-                weight_missing.remove(weight_missing[i])
+                df = pd.read_csv(cache_path)
+                df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d') 
+                pre_loaded_data = pd.concat([pre_loaded_data,df])
+                lat_missing.remove(lat_list[i])
+                lon_missing.remove(lon_list[i])
+                loaded =+ 1
     
             
     elif raw_storage == "big_query":
         print(f"❌ restore_raw_weather_data with big_query is not developed yet, fallback on local")
-        return restore_raw_weather_data(lat_list, lon_list, locations_weights, "local")
+        return restore_raw_weather_data(lat_list, lon_list, "local")
     else :
         print(f"❌ restore_raw_weather_data RAW_WEATHER_STORAGE is not correct")
         return None
     
     if len(pre_loaded_data) > 0:
-        print(f"✅ restore_raw_weather_data return {len(pre_loaded_data)} weather data")
-        weight_reordered = weight_missing.append(weight_preloaded)
+        print(f"✅ restore_raw_weather_data return {loaded} weather data")
     else :
         print(f"❌ Not able to restore any raw weather data")
-        weight_reordered = weight_missing
-        
-    return pre_loaded_data, lat_missing, lon_missing, weight_reordered
 
-def open_meteo_api(lat_list:list, lon_list:list):
+    return pre_loaded_data, lat_missing, lon_missing
+
+def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ open_meteo_api function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
@@ -85,14 +76,10 @@ def open_meteo_api(lat_list:list, lon_list:list):
         "daily": METEO_COLUMNS_DAILY,
         "timezone": "GMT"
     }
-    response = openmeteo.weather_api(url, params=params)
-    print(f"✅ open_meteo_api return api response for {len(response)} GPS coordonates")
-    
-    return response
-
-# Processing locations into a list
-def gps_location_to_weather(api_response, raw_storage = 'local'):
-    actual_weather =[]
+    api_response = openmeteo.weather_api(url, params=params)
+    print(f"✅ api_gps_location_to_weather return api response for {len(api_response)} GPS coordonates")
+ 
+    actual_weather =pd.DataFrame()
     for i in range(len(api_response)):
         response = api_response[i]
         #print(f"Coordinates {response.Latitude()}°E {response.Longitude()}°N")
@@ -122,46 +109,65 @@ def gps_location_to_weather(api_response, raw_storage = 'local'):
         daily_data["precipitation_sum"] = daily_precipitation_sum
         daily_data["rain_sum"] = daily_rain_sum
     
-        df = pd.DataFrame(daily_data)
+        daily_df = pd.DataFrame(daily_data)
+        
+        #Find the closest position from weather api to match the pixel
+        lat = lat_list[i]   #min(lat_list, key=lambda x:abs(x-response.Latitude()))
+        lon = lon_list[i]   #min(lon_list, key=lambda x:abs(x-response.Longitude()))
+        
+        print(lat, response.Latitude())
+        print(lon, response.Longitude())
+        
+        daily_df['lat'] = lat
+        daily_df['lon'] = lon
         
         #Save historical daily data in cache
-        lat = round(response.Latitude(),4)
-        lon = round(response.Longitude(),4)
+        lat = round(lat,4)
+        lon = round(lon,4)
         min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         if raw_storage == "local":
             cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
-            if df.shape[0] > 1:
-                df.to_csv(cache_path, header=True, index=True)
+            if daily_df.shape[0] > 1:
+                daily_df.to_csv(cache_path, header=True)
                 
         elif raw_storage == "big_query":
             print(f"❌ gps_location_to_weather storage with big_query is not developed yet, store locally")
             cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
-            if df.shape[0] > 1:
-                df.to_csv(cache_path, header=True, index=True)
-        
-        actual_weather.append(daily_data)
+            if daily_df.shape[0] > 1:
+                daily_df.to_csv(cache_path, header=True)
+    
+        actual_weather = pd.concat([actual_weather,daily_df])
             
     print(f"✅ gps_location_to_weather return weather history for {len(actual_weather)} GPS coordonates")
     
     return actual_weather
 
 #Building a country climatology from all gps locations
-def climatology_build(weather_per_location, weights):
-
+def climatology_build(weather_per_location, lat_list, lon_list, weights):
+    if len(lat_list) != len(lon_list) or len(lon_list) != len(weights):
+        print(f"❌ climatology_build function doesn't have same lenght for lat_list:{len(lat_list)}, lon_list:{len(lat_list)} and weights:{len(weights)}")
+        return None
+    
+    
     country_weather = pd.DataFrame()
-    for locations in range(len(weather_per_location)):
-        weather_point = pd.DataFrame(weather_per_location[locations])
+    for locations in range(len(lat_list)):
+        lat_mask = weather_per_location['lat']==lat_list[locations]
+        lon_mask = weather_per_location['lon']==lon_list[locations]
+        weather_point = weather_per_location[lat_mask & lon_mask]
+        
+        #############
+        #TO DO Add a condition if weather_point is empty to BREAK
+        ############
         
         #adding year column and month_number column
-        weather_point['month_number'] = weather_point['date'].dt.month
         weather_point['year'] = weather_point['date'].dt.year
         
         #creating rain_season rainfall, dry_season rainfall and total rainfall per year
-        weather_grouped = weather_point.groupby(['year', weather_point['month_number'].isin([5, 6, 7, 8, 9])])['precipitation_sum'].sum().unstack(fill_value=0)
-        weather_grouped.columns = weather_grouped.columns = ['dry_season', 'rain_season']
+        weather_grouped = weather_point.groupby(['year', weather_point['date'].dt.month.isin([5, 6, 7, 8, 9])])['precipitation_sum'].sum().unstack(fill_value=0)
+        weather_grouped.columns = ['dry_season', 'rain_season']
         weather_grouped["total_year_rain"] = weather_grouped["dry_season"] + weather_grouped["rain_season"]
         
         # counting the number of rain days for each year
