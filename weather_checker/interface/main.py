@@ -21,7 +21,8 @@ def get_climatology(lat_list:list = [5.390770,5.392571,5.324686,5.323670],
     pre_loaded_data, lat_missing, lon_missing, weight_reordered = restore_raw_weather_data(lat_list, lon_list, locations_weights, RAW_WEATHER_STORAGE)
     response = open_meteo_api(lat_missing, lon_missing)
     daily_weather = gps_location_to_weather(response)
-    daily_weather.append(pre_loaded_data)
+    if len(pre_loaded_data)>0:
+        daily_weather.append(pre_loaded_data)
     climatology = climatology_build(daily_weather, weight_reordered)
     
     print("✅ get_climatology() done \n")

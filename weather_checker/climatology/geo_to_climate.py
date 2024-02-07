@@ -37,7 +37,11 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
             lon = round(lon_list[i],4)
             cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
             if cache_path.is_file():
-                pre_loaded_data.append(pd.read_json(cache_path))
+                df = pd.read_csv(cache_path, header=True, index_col="date")
+                print(df.head())
+                data = df.to_dict()
+                print("TO DO : modify index str to datetime")
+                pre_loaded_data.append(data)
                 lat_preloaded.append(lat)
                 lon_preloaded.append(lat)
                 weight_preloaded.append(weight_missing[i])
@@ -57,7 +61,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
         print(f"✅ restore_raw_weather_data return {len(pre_loaded_data)} weather data")
         weight_reordered = weight_missing.append(weight_preloaded)
     else :
-        print(f"Not able to restore any raw weather data")
+        print(f"❌ Not able to restore any raw weather data")
         weight_reordered = weight_missing
         
     return pre_loaded_data, lat_missing, lon_missing, weight_reordered
@@ -118,7 +122,7 @@ def gps_location_to_weather(api_response, raw_storage = 'local'):
         daily_data["precipitation_sum"] = daily_precipitation_sum
         daily_data["rain_sum"] = daily_rain_sum
     
-        actual_weather.append(daily_data)
+        df = pd.DataFrame(daily_data)
         
         #Save historical daily data in cache
         lat = round(response.Latitude(),4)
@@ -126,15 +130,19 @@ def gps_location_to_weather(api_response, raw_storage = 'local'):
         min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         if raw_storage == "local":
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
-            # Convertir et écrire l'objet JSON dans un fichier
-            with open(cache_path, "w") as outfile:
-                json.dump(daily_data, outfile)
+            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
+            #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
+            if df.shape[0] > 1:
+                df.to_csv(cache_path, header=True, index=True)
+                
         elif raw_storage == "big_query":
             print(f"❌ gps_location_to_weather storage with big_query is not developed yet, store locally")
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
-            daily_data.to_json(cache_path)
-            
+            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
+            #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
+            if df.shape[0] > 1:
+                df.to_csv(cache_path, header=True, index=True)
+        
+        actual_weather.append(daily_data)
             
     print(f"✅ gps_location_to_weather return weather history for {len(actual_weather)} GPS coordonates")
     
@@ -167,13 +175,13 @@ def climatology_build(weather_per_location, weights):
         
         #creating the final dataframe for the location
         weather_total = pd.concat([weather_grouped, yearly_rain_day,intense_rain_day], axis=1)
-        weather_total["latitude"] = locations.Latitude()            #Not optimized
-        weather_total["longitude"] = locations.Longitude()          #Not optimized
-        weather_total["location_weight"] = weights[locations]       #Not optimized
-        weather_total["dry_season_weighted"] = weather_total["dry_season"] * weather_total["location_weight"]
-        weather_total["rain_season_weighted"] = weather_total["rain_season"] * weather_total["location_weight"]
-        weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * weather_total["location_weight"]
-        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * weather_total["location_weight"]
+        #weather_total["latitude"] = locations.Latitude()            #Not optimized
+        #weather_total["longitude"] = locations.Longitude()          #Not optimized
+        #weather_total["location_weight"] = weights[locations]       #Not optimized
+        weather_total["dry_season_weighted"] = weather_total["dry_season"] * weights[locations]  #weather_total["location_weight"]
+        weather_total["rain_season_weighted"] = weather_total["rain_season"] * weights[locations]  #weather_total["location_weight"]
+        weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * weights[locations]  #weather_total["location_weight"]
+        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * weights[locations]  #weather_total["location_weight"]
         #possible to weight the number of rain days
         
         #concatenating into the country dataframe with details per GPS point
