@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := install
+#.DEFAULT_GOAL := install
 #################### PACKAGE ACTIONS ###################
 install:
     @pip install -e .

@@ -15,7 +15,7 @@ from sklearn.cluster import KMeans
 
 from weather_checker.params import *
 
-def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:list, raw_storage = 'local'):
+def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:list, raw_storage:str='local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ restore_raw_weather_data function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
@@ -48,17 +48,18 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
             
     elif raw_storage == "big_query":
         print(f"❌ restore_raw_weather_data with big_query is not developed yet, fallback on local")
-        return restore_raw_weather_data(lat_list, lon_list, "local")
+        return restore_raw_weather_data(lat_list, lon_list, locations_weights, "local")
     else :
         print(f"❌ restore_raw_weather_data RAW_WEATHER_STORAGE is not correct")
         return None
     
     if len(pre_loaded_data) > 0:
         print(f"✅ restore_raw_weather_data return {len(pre_loaded_data)} weather data")
+        weight_reordered = weight_missing.append(weight_preloaded)
     else :
         print(f"Not able to restore any raw weather data")
+        weight_reordered = weight_missing
         
-    weight_reordered = weight_missing.append(weight_preloaded)
     return pre_loaded_data, lat_missing, lon_missing, weight_reordered
 
 def open_meteo_api(lat_list:list, lon_list:list):
@@ -71,13 +72,13 @@ def open_meteo_api(lat_list:list, lon_list:list):
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
-    url = {OPEN_METEO_URL}
+    url = OPEN_METEO_URL
     params = {
         "latitude": lat_list,
         "longitude": lon_list,
-        "start_date": {METEO_START_DATE},
-        "end_date": {METEO_END_DATE},
-        "daily": {METEO_COLUMNS_DAILY},
+        "start_date": METEO_START_DATE,
+        "end_date": METEO_END_DATE,
+        "daily": METEO_COLUMNS_DAILY,
         "timezone": "GMT"
     }
     response = openmeteo.weather_api(url, params=params)
@@ -126,7 +127,9 @@ def gps_location_to_weather(api_response, raw_storage = 'local'):
         max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         if raw_storage == "local":
             cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
-            daily_data.to_json(cache_path)
+            # Convertir et écrire l'objet JSON dans un fichier
+            with open(cache_path, "w") as outfile:
+                json.dump(daily_data, outfile)
         elif raw_storage == "big_query":
             print(f"❌ gps_location_to_weather storage with big_query is not developed yet, store locally")
             cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")

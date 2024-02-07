@@ -20,7 +20,7 @@ GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
 RAW_METEO_PATH = os.path.join(os.path.dirname(os.getcwd()), "raw_data", "raw_meteo")
 
-METEO_COLUMNS_DAILY =  ["weather_code","temperature_2m_max", "temperature_2m_min","temperature_2m_mean", "precipitation_sum", "rain_sum"]
+METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_max", "temperature_2m_min","temperature_2m_mean", "precipitation_sum", "rain_sum"]
 
 
 
