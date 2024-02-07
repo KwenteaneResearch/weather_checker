@@ -15,7 +15,7 @@ from sklearn.cluster import KMeans
 
 from weather_checker.params import *
 
-def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:list):
+def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:list, raw_storage = 'local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ restore_raw_weather_data function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
@@ -31,7 +31,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
 
-    if RAW_WEATHER_STORAGE == "local":
+    if raw_storage == "local":
         for i in range(len(lat_list)):
             lat = round(lat_list[i],4)
             lon = round(lon_list[i],4)
@@ -46,10 +46,9 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, locations_weights:lis
                 weight_missing.remove(weight_missing[i])
     
             
-    elif RAW_WEATHER_STORAGE == "big_query":
+    elif raw_storage == "big_query":
         print(f"❌ restore_raw_weather_data with big_query is not developed yet, fallback on local")
-        RAW_WEATHER_STORAGE = "local"
-        return restore_raw_weather_data(lat_list, lon_list)
+        return restore_raw_weather_data(lat_list, lon_list, "local")
     else :
         print(f"❌ restore_raw_weather_data RAW_WEATHER_STORAGE is not correct")
         return None
@@ -87,7 +86,7 @@ def open_meteo_api(lat_list:list, lon_list:list):
     return response
 
 # Processing locations into a list
-def gps_location_to_weather(api_response):
+def gps_location_to_weather(api_response, raw_storage = 'local'):
     actual_weather =[]
     for i in range(len(api_response)):
         response = api_response[i]
@@ -125,8 +124,13 @@ def gps_location_to_weather(api_response):
         lon = round(response.Longitude(),4)
         min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
-        cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
-        daily_data.to_json(cache_path)
+        if raw_storage == "local":
+            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
+            daily_data.to_json(cache_path)
+        elif raw_storage == "big_query":
+            print(f"❌ gps_location_to_weather storage with big_query is not developed yet, store locally")
+            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.json")
+            daily_data.to_json(cache_path)
             
             
     print(f"✅ gps_location_to_weather return weather history for {len(actual_weather)} GPS coordonates")
@@ -134,7 +138,7 @@ def gps_location_to_weather(api_response):
     return actual_weather
 
 #Building a country climatology from all gps locations
-def climatology_build(weather_per_location):
+def climatology_build(weather_per_location, weights):
 
     country_weather = pd.DataFrame()
     for locations in range(len(weather_per_location)):
@@ -160,9 +164,9 @@ def climatology_build(weather_per_location):
         
         #creating the final dataframe for the location
         weather_total = pd.concat([weather_grouped, yearly_rain_day,intense_rain_day], axis=1)
-        weather_total["latitude"] = responses[0].Latitude()
-        weather_total["longitude"] = responses[0].Longitude()
-        weather_total["location_weight"] = locations_weights[locations]
+        weather_total["latitude"] = locations.Latitude()            #Not optimized
+        weather_total["longitude"] = locations.Longitude()          #Not optimized
+        weather_total["location_weight"] = weights[locations]       #Not optimized
         weather_total["dry_season_weighted"] = weather_total["dry_season"] * weather_total["location_weight"]
         weather_total["rain_season_weighted"] = weather_total["rain_season"] * weather_total["location_weight"]
         weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * weather_total["location_weight"]

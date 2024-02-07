@@ -18,7 +18,7 @@ def get_climatology(lat_list:list = [5.390770,5.392571,5.324686,5.323670],
     
     # TO DO : Load / Save Climatology dataframe into csv
     
-    pre_loaded_data, lat_missing, lon_missing, weight_reordered = restore_raw_weather_data(lat_list, lon_list, locations_weights)
+    pre_loaded_data, lat_missing, lon_missing, weight_reordered = restore_raw_weather_data(lat_list, lon_list, locations_weights, RAW_WEATHER_STORAGE)
     response = open_meteo_api(lat_missing, lon_missing)
     daily_weather = gps_location_to_weather(response)
     daily_weather.append(pre_loaded_data)
