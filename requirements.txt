@@ -14,4 +14,16 @@ openmeteo-requests
 requests-cache 
 retry-requests
 
-fastapi
+mlflow==2.1.1
+prefect==2.14.9
+
+python-dotenv
+
+# API
+fastapi==0.108.0
+pytz
+uvicorn
+# tests
+httpx
+pytest-asyncio
+pydantic
