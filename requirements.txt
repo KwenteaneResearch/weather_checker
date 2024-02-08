@@ -1,17 +1,40 @@
-pytest
-pylint
 ipdb
 jupyterlab
-numpy
-pandas
 matplotlib
 seaborn
-scikit-learn
+numpy==1.23.5
+pandas==1.5.3
+scipy==1.10.0
+scikit-learn==1.3.1
+colorama
+#tracemalloc    #utils.py
+#time           #utils.py
+#dateutil
+#pathlib
 
-requests
+# Geo Data
 geopandas
+
+# Open Meteo API
+requests
 openmeteo-requests
 requests-cache 
 retry-requests
 
-fastapi
+# Model lifecycle
+mlflow==2.1.1
+prefect==2.14.9
+
+
+
+# API
+fastapi==0.108.0
+pytz
+uvicorn
+
+# tests
+pytest
+pylint
+httpx
+pytest-asyncio
+pydantic
