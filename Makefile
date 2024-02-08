@@ -1,25 +1,16 @@
 #.DEFAULT_GOAL := install
 #################### PACKAGE ACTIONS ###################
 install:
-    @pip install -e .
+	@pip install -e .
 
 reinstall_package:
 	@pip uninstall -y weather_checker || :
 	@pip install -e .
 
-#run_preprocess:
-#	python -c 'from taxifare.interface.main import preprocess; preprocess()'
+run_get_climatology:
+	python -c 'from weather_checker.interface.main import get_climatology; get_climatology()'
 
-#run_train:
-#	python -c 'from taxifare.interface.main import train; train()'
-
-#run_pred:
-#	python -c 'from taxifare.interface.main import pred; pred()'
-
-#run_evaluate:
-#	python -c 'from taxifare.interface.main import evaluate; evaluate()'
-
-#run_all: run_preprocess run_train run_pred run_evaluate
+run_all: run_get_climatology
 
 #run_workflow:
 #	PREFECT__LOGGING__LEVEL=${PREFECT_LOG_LEVEL} python -m taxifare.interface.workflow
@@ -32,15 +23,25 @@ reinstall_package:
 install_requirements:
 	@pip install -r requirements.txt
 
+init_raw_data_folders:
+	rm -rf raw_data
+	mkdir -p raw_data
+	mkdir -p raw_data/raw_weather
+	mkdir -p raw_data/climatologies
+	mkdir -p raw_data/gps_locations
+
 reset_raw_weather:
-	rm -rf ${RAW_DATA_FOLDER}/raw_weather
-	mkdir -p ${RAW_DATA_FOLDER}/raw_weather
-#	mkdir ~/.lewagon/mlops/data/raw
-#	mkdir ~/.lewagon/mlops/data/processed
-#	mkdir ~/.lewagon/mlops/training_outputs
-#	mkdir ~/.lewagon/mlops/training_outputs/metrics
-#	mkdir ~/.lewagon/mlops/training_outputs/models
-#	mkdir ~/.lewagon/mlops/training_outputs/params
+	rm -rf raw_data/raw_weather
+	mkdir -p raw_data/raw_weather
+
+reset_climatologies:
+	rm -rf raw_data/climatologies
+	mkdir -p raw_data/climatologies
+
+reset_gps_locations:
+	rm -rf raw_data/gps_locations
+	mkdir -p raw_data/gps_locations
+
 
 ################### DOCKER ACTIONS ################
 docker_build:

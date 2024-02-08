@@ -18,7 +18,7 @@ GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
 ##################  CONSTANTS  #####################
 
-RAW_METEO_PATH = os.path.join(os.getcwd(), "raw_data")
+RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
 METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_max", "temperature_2m_min","temperature_2m_mean", "precipitation_sum", "rain_sum"]
 
