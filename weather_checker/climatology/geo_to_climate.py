@@ -1,6 +1,7 @@
 """From geo_data lists, compute the historical climatology for the weighted GPS coordonates"""
 import openmeteo_requests
 import requests_cache
+import numpy as np
 import pandas as pd
 from retry_requests import retry
 import json
@@ -33,7 +34,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='loca
         for i in range(len(lat_list)):
             lat = round(lat_list[i],4)
             lon = round(lon_list[i],4)
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
+            cache_path = Path(RAW_DATA_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             if cache_path.is_file():
                 df = pd.read_csv(cache_path)
                 df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d') 
@@ -127,14 +128,14 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'loc
         min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
         if raw_storage == "local":
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
+            cache_path = Path(RAW_DATA_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
             if daily_df.shape[0] > 1:
                 daily_df.to_csv(cache_path, header=True)
                 
         elif raw_storage == "big_query":
             print(f"❌ gps_location_to_weather storage with big_query is not developed yet, store locally")
-            cache_path = Path(RAW_METEO_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
+            cache_path = Path(RAW_DATA_PATH).joinpath("raw_weather", f"daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv")
             #cache_path = f"/home/alexandreline/code/KwenteaneResearch/weather_checker/raw_data/daily_weather_{lat}_{lon}_{min_date}_{max_date}.csv"
             if daily_df.shape[0] > 1:
                 daily_df.to_csv(cache_path, header=True)
@@ -202,3 +203,21 @@ def climatology_build(weather_per_location, lat_list, lon_list, weights):
         country_climatology = pd.concat([country_weather_dry_season, country_weather_rain_season,country_weather_rain,country_weather_rain_days,country_weather_intense_rain], axis=1)
 
     return country_climatology
+
+def save_load_climatology(save:bool=True, total_weight:float=0.1, climat=pd.DataFrame()):
+    min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
+    max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
+    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{COUNTRY}_{total_weight}_{min_date}_{max_date}.csv")
+    if save :
+        if climat.shape[0] > 1:
+            climat.to_csv(cache_path, header=True)
+            print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} saved")
+    else :
+        if cache_path.is_file():
+                climat = pd.read_csv(cache_path)
+                print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} loaded")
+                return climat
+    return None
+                
+    
+    
