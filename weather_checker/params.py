@@ -4,6 +4,7 @@ import numpy as np
 ##################  VARIABLES  ##################
 
 DATA_SIZE = os.environ.get("DATA_SIZE")
+COUNTRY = os.environ.get("COUNTRY")
 RAW_WEATHER_STORAGE = os.environ.get("RAW_WEATHER_STORAGE")
 
 
@@ -29,6 +30,7 @@ METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_max", "temperature_2m_min"
 env_valid_options = dict(
     #DATA_SIZE=["1k", "200k", "all"],
     RAW_WEATHER_STORAGE=["local", "big_query"],
+    COUNTRY=["all"]
 )
 
 def validate_env_value(env, valid_options):

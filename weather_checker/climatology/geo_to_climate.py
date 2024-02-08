@@ -207,7 +207,7 @@ def climatology_build(weather_per_location, lat_list, lon_list, weights):
 def save_load_climatology(save:bool=True, total_weight:float=0.1, climat=pd.DataFrame()):
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
-    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{total_weight}_{min_date}_{max_date}.csv")
+    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{COUNTRY}_{total_weight}_{min_date}_{max_date}.csv")
     if save :
         if climat.shape[0] > 1:
             climat.to_csv(cache_path, header=True)

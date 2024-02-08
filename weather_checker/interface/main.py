@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from pathlib import Path
+
 from colorama import Fore, Style
 
 from weather_checker.params import *
@@ -14,7 +14,7 @@ from weather_checker.climatology.geo_to_climate import *
 def get_climatology(lat_list:list = [],
                     lon_list:list = [],
                     locations_weights:list = [],
-                    total_weight:float = 0.0007137254902): #0.0007137254902 top10 / 0.1 top50
+                    total_weight:float = 0.1): #0.0007137254902 top10 / 0.1 top50
     
     if len(lat_list) == 0 or len(lon_list) == 0 or len(locations_weights)==0:
         lat_list, lon_list, locations_weights = load_gps_weighted(total_weight) 
@@ -24,7 +24,7 @@ def get_climatology(lat_list:list = [],
         
     
     print(Fore.BLUE + f"Running get_climatology()..." + Style.RESET_ALL)
-    print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
+    #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
     
     climatology = save_load_climatology(save=False, total_weight=np.round(np.sum(locations_weights),8))
     
