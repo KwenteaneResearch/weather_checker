@@ -1,6 +1,7 @@
 raw_data/
 .python-version
 .env
+build/
 
 # OS generated files #
 ######################

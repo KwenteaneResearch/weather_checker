@@ -1,5 +1,8 @@
-.DEFAULT_GOAL := default
+#.DEFAULT_GOAL := install
 #################### PACKAGE ACTIONS ###################
+install:
+    @pip install -e .
+
 reinstall_package:
 	@pip uninstall -y weather_checker || :
 	@pip install -e .
@@ -28,6 +31,16 @@ reinstall_package:
 ################### LOCAL ACTIONS ################
 install_requirements:
 	@pip install -r requirements.txt
+
+reset_raw_weather:
+	rm -rf ${RAW_DATA_FOLDER}/raw_weather
+	mkdir -p ${RAW_DATA_FOLDER}/raw_weather
+#	mkdir ~/.lewagon/mlops/data/raw
+#	mkdir ~/.lewagon/mlops/data/processed
+#	mkdir ~/.lewagon/mlops/training_outputs
+#	mkdir ~/.lewagon/mlops/training_outputs/metrics
+#	mkdir ~/.lewagon/mlops/training_outputs/models
+#	mkdir ~/.lewagon/mlops/training_outputs/params
 
 ################### DOCKER ACTIONS ################
 docker_build:
