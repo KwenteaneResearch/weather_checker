@@ -9,7 +9,7 @@ def load_gps_weighted(total_weight:float=0):
         cache_path = Path(RAW_DATA_PATH).joinpath("gps_locations", "top50-gps.csv" if total_weight == 0.1 else "top10-gps.csv")
     else :
         cache_path = Path(RAW_DATA_PATH).joinpath("gps_locations", f"gps_weight_{COUNTRY}_{np.round(total_weight,8)}.csv")
-        
+
     if not cache_path.is_file():
         print(f"❌ GPS Locations of total weight {np.round(total_weight,8)} not found in {cache_path}")
         return None
@@ -20,4 +20,4 @@ def load_gps_weighted(total_weight:float=0):
         locations_weights = climat.weight.tolist()
 
         print(f"✅ GPS Locations of total weight {np.round(total_weight,8)} loaded")
-        return lat_list, lon_list, locations_weights 
+        return lat_list, lon_list, locations_weights
