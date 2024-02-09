@@ -57,7 +57,10 @@ docker_build:
 	docker build --tag=${GAR_IMAGE}:light .
 
 docker_sh_light:
-	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:light sh 
+	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:light sh
 
 docker_run_light:
 	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:light
+
+streamlit:
+	-@streamlit run app.py
