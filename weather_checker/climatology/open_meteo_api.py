@@ -93,7 +93,7 @@ def get_daily_data():
         print(f"API call for latidudes : {lat_missing} \nlongitudes : {lon_missing}")
         daily_weather = api_gps_location_to_weather(lat_missing, lon_missing, prod_list)
     
-    if daily_weather.shape[0] > 1:
+    if daily_weather.shape[0] + pre_loaded_data.shape[0] >= 10:
         file_done(filename)
     
     return None
