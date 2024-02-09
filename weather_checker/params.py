@@ -24,14 +24,19 @@ RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
 METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_mean", "precipitation_sum"]
 
-
+COUNTRY_PRODUCTION = {"CIV":1879953.901,
+                      "GHA":895249.9013,
+                      "NGA":318102.2002,
+                      "CMR":299404.9002,
+                      "rest":177288.60,
+                      "all":3569999.503}
 
 ################## VALIDATIONS #################
 
 env_valid_options = dict(
     #DATA_SIZE=["1k", "200k", "all"],
     RAW_WEATHER_STORAGE=["local", "big_query"],
-    COUNTRY=["CIV","GHA","NGA","CMR","all"]
+    COUNTRY=["CIV","GHA","NGA","CMR","rest","all"]
 )
 
 def validate_env_value(env, valid_options):
