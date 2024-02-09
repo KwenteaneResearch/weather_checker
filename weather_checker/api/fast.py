@@ -41,7 +41,7 @@ def climatology(country_code:str='CIV', sample_weight:float=0.05):
     """
     climat, returned_weight = get_climatology(country_code,sample_weight)
     
-    return {'predicted-fare': f"climatology done for {country_code} on {np.round(returned_weight,2)*100}% of the cocoa production from {min(climat['year'])} to {max(climat['year'])}"}
+    return {'predicted-fare': f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
 
 @app.get("/")

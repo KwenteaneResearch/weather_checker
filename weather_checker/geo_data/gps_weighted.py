@@ -21,9 +21,9 @@ def filter_locations_by_country_weight(country:str='CIV', top_percentage:float=0
     df_filter = df_country[df_country.percentage <= top_percentage].copy()
     df_filter.drop(['ID', 'NAME_0', 'X_lon_3857', 'Y_lat_3857', 'percentage'], axis=1, inplace=True)
     df_filter = df_filter.rename(columns={"Production": "prod", "ISO": "country", "X_lon_4326": "longitude", "Y_lat_4326": "latitude"},)
-    path = os.path.join(RAW_DATA_PATH,  f'gps_locations/gps_weight_{country}_{np.round(top_percentage,4)}.csv')
+    path = os.path.join(RAW_DATA_PATH,  f'gps_locations/gps_weight_{country}_{np.round(top_percentage,8)}.csv')
     df_filter.to_csv(path, index=False)
-    print(f"✅ GPS Locations of total weight {np.round(top_percentage,4)} of {country} saved in {path}")
+    print(f"✅ GPS Locations of total weight {np.round(top_percentage,8)} of {country} saved in {path}")
     return df_filter
 
 
