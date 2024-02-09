@@ -15,6 +15,8 @@ from weather_checker.climatology.models import *
 def get_climatology(country_code:str='CIV', sample_weight:float=0.05): 
 
     reduced = False
+    retrieved_locations = 0
+    loaded = 0
     
     print(Fore.BLUE + f"Running get_climatology()..." + Style.RESET_ALL)
     #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
