@@ -30,7 +30,7 @@ install_requirements:
 	@pip install -r requirements.txt
 
 init_raw_data_folders:
-	rm -rf raw_data
+#	rm -rf raw_data
 	mkdir -p raw_data
 	mkdir -p raw_data/raw_weather
 	mkdir -p raw_data/climatologies
@@ -41,12 +41,15 @@ init_raw_data_folders:
 #	mkdir -p raw_data/raw_weather
 
 reset_climatologies:
-	rm -rf raw_data/climatologies
+#	rm -rf raw_data/climatologies
 	mkdir -p raw_data/climatologies
 
 reset_gps_locations:
-	rm -rf raw_data/gps_locations
+#	rm -rf raw_data/gps_locations
 	mkdir -p raw_data/gps_locations
+	mkdir -p raw_data/gps_locations/to_be_processed
+	mkdir -p raw_data/gps_locations/doing
+	mkdir -p raw_data/gps_locations/done
 
 
 ################### DOCKER ACTIONS ################
