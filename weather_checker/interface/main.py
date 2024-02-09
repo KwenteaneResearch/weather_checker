@@ -15,13 +15,15 @@ from weather_checker.climatology.models import *
 def get_climatology(country_code:str='CIV', sample_weight:float=0.05): 
 
     reduced = False
+    retrieved_locations = 0
+    loaded = 0
     
     print(Fore.BLUE + f"Running get_climatology()..." + Style.RESET_ALL)
     #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
-    lat_list, lon_list, prod_list = load_gps(country_code, np.round(sample_weight,4))
+    lat_list, lon_list, prod_list = load_gps(country_code, np.round(sample_weight,8))
     
     
-    climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight))
+    climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight,8))
 
 
     if climatology.shape[0] == 0:
@@ -37,16 +39,16 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
             daily_weather = pd.concat([daily_weather, pre_loaded_data])
         #print(daily_weather.head())
         #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
-        if daily_weather.shape[0] == 0:
-            print(f"❌ No weather data computer - QUIT")
+        if daily_weather.shape[0] == 0 or retrieved_locations + loaded == 0:
+            print(f"❌ No weather data computed - QUIT")
             return None
         else :
             climatology = climatology_build(daily_weather, lat_list, lon_list, prod_list)
 
         if reduced :
-            save_load_climatology(save=True, country=country_code, sample_weight=np.round(actual_percent,4), climat=climatology)
+            save_load_climatology(save=True, country=country_code, sample_weight=np.round(actual_percent,8), climat=climatology)
         else :
-            save_load_climatology(save=True, country=country_code, sample_weight=np.round(sample_weight,4), climat=climatology)
+            save_load_climatology(save=True, country=country_code, sample_weight=np.round(sample_weight,8), climat=climatology)
 
     print("✅ get_climatology() done")
 
@@ -60,7 +62,7 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
     print(cocoa_years_outliers)
     """
 
-    return climatology
+    return climatology, np.round(sample_weight,8) if not reduced else np.round(actual_percent,8)
 
 
 
