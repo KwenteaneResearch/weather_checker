@@ -58,7 +58,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='loca
 
     return pre_loaded_data, lat_missing, lon_missing
 
-def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'local'):
+def api_gps_location_to_weather(lat_list:list, lon_list:list, prod_list:list, raw_storage = 'local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ open_meteo_api function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
@@ -69,15 +69,26 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'loc
     openmeteo = openmeteo_requests.Client(session = retry_session)
 
     url = OPEN_METEO_URL
-    params = {
-        "latitude": lat_list,
-        "longitude": lon_list,
-        "start_date": METEO_START_DATE,
-        "end_date": METEO_END_DATE,
-        "daily": METEO_COLUMNS_DAILY,
-        "timezone": "GMT"
-    }
-    api_response = openmeteo.weather_api(url, params=params)
+    api_response = []
+    #1 by 1 location api call
+    for i in range(len(lat_list)):
+        params = {
+            "latitude": lat_list[i],
+            "longitude": lon_list[i],
+            "start_date": METEO_START_DATE,
+            "end_date": METEO_END_DATE,
+            "daily": METEO_COLUMNS_DAILY,
+            "timezone": "GMT"
+        }
+        try :
+            api_response.append(openmeteo.weather_api(url, params=params)[0])
+        except Exception:
+            print(f"❌ openmeteo.weather_api return api error")
+            if len(api_response) == 0:
+                print(f"❌ openmeteo.weather_api didn't return any data")
+                return pd.DataFrame()
+        
+        
     print(f"✅ api_gps_location_to_weather return api response for {len(api_response)} GPS coordonates")
  
     actual_weather =pd.DataFrame()
@@ -91,11 +102,10 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'loc
         # Process daily data. The order of variables needs to be the same as requested.
         daily = response.Daily()
         daily_weather_code = daily.Variables(0).ValuesAsNumpy()
-        daily_temperature_2m_max = daily.Variables(1).ValuesAsNumpy()
-        daily_temperature_2m_min = daily.Variables(2).ValuesAsNumpy()
-        daily_temperature_2m_mean = daily.Variables(3).ValuesAsNumpy()
-        daily_precipitation_sum = daily.Variables(4).ValuesAsNumpy()
-        daily_rain_sum = daily.Variables(5).ValuesAsNumpy()
+        daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
+        daily_temperature_2m_mean = daily.Variables(2).ValuesAsNumpy()
+        #daily_temperature_2m_max = daily.Variables(3).ValuesAsNumpy()
+        #daily_temperature_2m_min = daily.Variables(4).ValuesAsNumpy()
         
         daily_data = {"date": pd.date_range(
         	start = pd.to_datetime(daily.Time(), unit = "s"),
@@ -104,23 +114,24 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'loc
         	inclusive = "left"
         )}
         daily_data["weather_code"] = daily_weather_code
-        daily_data["temperature_2m_max"] = daily_temperature_2m_max
-        daily_data["temperature_2m_min"] = daily_temperature_2m_min
-        daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
         daily_data["precipitation_sum"] = daily_precipitation_sum
-        daily_data["rain_sum"] = daily_rain_sum
-    
+        daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
+        #daily_data["temperature_2m_max"] = daily_temperature_2m_max
+        #daily_data["temperature_2m_min"] = daily_temperature_2m_min
+        
         daily_df = pd.DataFrame(daily_data)
         
         #Find the closest position from weather api to match the pixel
         lat = lat_list[i]   #min(lat_list, key=lambda x:abs(x-response.Latitude()))
         lon = lon_list[i]   #min(lon_list, key=lambda x:abs(x-response.Longitude()))
+        prod = prod_list[i]
         
         print(lat, response.Latitude())
         print(lon, response.Longitude())
         
         daily_df['lat'] = lat
         daily_df['lon'] = lon
+        daily_df['prod'] = prod
         
         #Save historical daily data in cache
         lat = round(lat,4)
@@ -147,8 +158,8 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, raw_storage = 'loc
     return actual_weather
 
 #Building a country climatology from all gps locations
-def climatology_build(weather_per_location, lat_list, lon_list, weights):
-    if len(lat_list) != len(lon_list) or len(lon_list) != len(weights):
+def climatology_build(weather_per_location, lat_list, lon_list, prod):
+    if len(lat_list) != len(lon_list) or len(lon_list) != len(prod):
         print(f"❌ climatology_build function doesn't have same lenght for lat_list:{len(lat_list)}, lon_list:{len(lat_list)} and weights:{len(weights)}")
         return None
     
@@ -182,13 +193,10 @@ def climatology_build(weather_per_location, lat_list, lon_list, weights):
         
         #creating the final dataframe for the location
         weather_total = pd.concat([weather_grouped, yearly_rain_day,intense_rain_day], axis=1)
-        #weather_total["latitude"] = locations.Latitude()            #Not optimized
-        #weather_total["longitude"] = locations.Longitude()          #Not optimized
-        #weather_total["location_weight"] = weights[locations]       #Not optimized
-        weather_total["dry_season_weighted"] = weather_total["dry_season"] * weights[locations]  #weather_total["location_weight"]
-        weather_total["rain_season_weighted"] = weather_total["rain_season"] * weights[locations]  #weather_total["location_weight"]
-        weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * weights[locations]  #weather_total["location_weight"]
-        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * weights[locations]  #weather_total["location_weight"]
+        weather_total["dry_season_weighted"] = weather_total["dry_season"] * prod[locations]/sum(prod)  #weather_total["location_weight"]
+        weather_total["rain_season_weighted"] = weather_total["rain_season"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
+        weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
+        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
         #possible to weight the number of rain days
         
         #concatenating into the country dataframe with details per GPS point
@@ -214,10 +222,10 @@ def save_load_climatology(save:bool=True, total_weight:float=0.1, climat=pd.Data
             print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} saved")
     else :
         if cache_path.is_file():
-                climat = pd.read_csv(cache_path)
-                print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} loaded")
-                return climat
-    return None
+            climat = pd.read_csv(cache_path)
+            print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} loaded")
+            return climat
+    return pd.DataFrame()
                 
     
     
