@@ -22,6 +22,7 @@ def load_gps_weighted(total_weight:float=0):
         print(f"✅ GPS Locations of total weight {np.round(total_weight,8)} loaded")
         return lat_list, lon_list, locations_weights
 
+
 def filter_locations_by_country_weight(country:str, top_percentage:float):
     """
     Filtering 'top_percentage' production locations for iso-code 'country'
@@ -44,3 +45,4 @@ def filter_locations_by_country_weight(country:str, top_percentage:float):
     path = os.path.join(RAW_DATA_PATH,  f'gps_locations/gps_weight_{country}_{np.round(top_percentage,8)}.csv')
     df_filter.to_csv(path, index=False)
     print(f"✅ filtered dataframe exported into {path}")
+
