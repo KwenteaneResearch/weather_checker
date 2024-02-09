@@ -37,8 +37,8 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
             daily_weather = pd.concat([daily_weather, pre_loaded_data])
         #print(daily_weather.head())
         #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
-        if daily_weather.shape[0] == 0:
-            print(f"❌ No weather data computer - QUIT")
+        if daily_weather.shape[0] == 0 or retrieved_locations + loaded == 0:
+            print(f"❌ No weather data computed - QUIT")
             return None
         else :
             climatology = climatology_build(daily_weather, lat_list, lon_list, prod_list)
@@ -60,7 +60,7 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
     print(cocoa_years_outliers)
     """
 
-    return climatology
+    return climatology, np.round(sample_weight,4) if not reduced else np.round(actual_percent,4)
 
 
 

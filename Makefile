@@ -21,8 +21,8 @@ run_all: run_get_climatology
 #run_workflow:
 #	PREFECT__LOGGING__LEVEL=${PREFECT_LOG_LEVEL} python -m taxifare.interface.workflow
 
-#run_api:
-#	uvicorn taxifare.api.fast:app --reload
+run_api:
+	uvicorn weather_checker.api.fast:app --reload
 
 
 ################### LOCAL ACTIONS ################
