@@ -177,7 +177,7 @@ def climatology_build(weather_per_location, lat_list, lon_list, prod):
     for locations in range(len(lat_list)):
         lat_mask = weather_per_location['lat']==lat_list[locations]
         lon_mask = weather_per_location['lon']==lon_list[locations]
-        weather_point = weather_per_location[lat_mask & lon_mask]
+        weather_point = weather_per_location[lat_mask & lon_mask].copy()
 
         #############
         #TO DO Add a condition if weather_point is empty to BREAK
