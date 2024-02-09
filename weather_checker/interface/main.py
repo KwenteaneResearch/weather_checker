@@ -9,6 +9,7 @@ from colorama import Fore, Style
 from weather_checker.params import *
 from weather_checker.geo_data.gps_weighted import *
 from weather_checker.climatology.geo_to_climate import *
+from weather_checker.climatology.models import *
 
 
 def get_climatology(lat_list:list = [],
@@ -41,11 +42,20 @@ def get_climatology(lat_list:list = [],
         
         save_load_climatology(save=True, total_weight=np.round(np.sum(locations_weights),8), climat=climatology)
     
-    print("✅ get_climatology() done \n")
+    print("✅ get_climatology() done")
     
+    rain_season_cumul, grouped_index_lists = k_means(climatology)
+    print(rain_season_cumul)
+    print(grouped_index_lists)
+    
+    climatology_outliers_scaled, cocoa_years_outliers = outliers(climatology)
+    print(climatology_outliers_scaled)
+    print(cocoa_years_outliers)
+
+
     return climatology
+
 
 
 if __name__ == '__main__':
     climatology = get_climatology()
-    print(climatology)
