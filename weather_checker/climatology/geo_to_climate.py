@@ -231,7 +231,7 @@ def save_load_climatology(save:bool=True, country:str='CIV', sample_weight:float
             print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} saved")
     else :
         if cache_path.is_file():
-            climat = pd.read_csv(cache_path)
+            climat = pd.read_csv(cache_path,index_col=[0])
             print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} loaded")
             return climat
     return pd.DataFrame()
