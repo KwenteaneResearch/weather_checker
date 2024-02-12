@@ -87,10 +87,10 @@ dl_all_data: init_gdown dl_raw_weather dl_input_csv dl_gps_locations
 
 ################### DOCKER ACTIONS ################
 docker_build:
-	docker build --tag=${GAR_IMAGE}:test .
+	docker build --tag=${GAR_IMAGE}:dev .
 
-docker_sh_test:
-	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:test sh 
+docker_sh_dev:
+	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:dev sh 
 
-docker_run_test:
-	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:test
+docker_run_dev:
+	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:test_v0.2
