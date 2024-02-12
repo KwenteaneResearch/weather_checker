@@ -13,6 +13,11 @@ get_daily_data:
 run_get_climatology:
 	python -c 'from weather_checker.interface.main import get_climatology; get_climatology()'
 
+run_analog_years:
+	python -c 'from weather_checker.climatology.models import analog_years; analog_years()'
+
+run_outliers:
+	python -c 'from weather_checker.climatology.models import outliers; outliers()'
 
 run_all: run_get_climatology
 
@@ -93,4 +98,7 @@ docker_sh_dev:
 	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:dev sh 
 
 docker_run_dev:
-	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:test_v0.2
+	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev
+
+streamlit:
+	-@streamlit run app.py
