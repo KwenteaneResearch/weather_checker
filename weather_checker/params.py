@@ -5,6 +5,7 @@ import numpy as np
 
 DATA_SIZE = os.environ.get("DATA_SIZE")
 COUNTRY = os.environ.get("COUNTRY")
+#COUNTRY_PROD = os.environ.get("COUNTRY_PROD")
 RAW_WEATHER_STORAGE = os.environ.get("RAW_WEATHER_STORAGE")
 
 
@@ -14,23 +15,28 @@ METEO_END_DATE = os.environ.get("METEO_END_DATE")
 
 
 GAR_IMAGE = os.environ.get("GAR_IMAGE")
-GAR_MEMORY = os.environ.get("GAR_MEMORY") 
+GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
 
 ##################  CONSTANTS  #####################
 
 RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
-METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_max", "temperature_2m_min","temperature_2m_mean", "precipitation_sum"]#, "rain_sum"]
+METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_mean", "precipitation_sum"]
 
-
+COUNTRY_PRODUCTION = {"CIV":1879953.901,
+                      "GHA":895249.9013,
+                      "NGA":318102.2002,
+                      "CMR":299404.9002,
+                      "rest":177288.60,
+                      "all":3569999.503}
 
 ################## VALIDATIONS #################
 
 env_valid_options = dict(
     #DATA_SIZE=["1k", "200k", "all"],
     RAW_WEATHER_STORAGE=["local", "big_query"],
-    COUNTRY=["CIV","GHA","NGA","CMR","all"]
+    COUNTRY=["CIV","GHA","NGA","CMR","rest","all"]
 )
 
 def validate_env_value(env, valid_options):
