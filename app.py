@@ -1,8 +1,8 @@
 import streamlit as st
+import os
 import datetime
 import pandas as pd
 import requests
-from weather_checker.params import *
 
 '''
 # Weather checker Streamlit frontend
@@ -10,8 +10,9 @@ from weather_checker.params import *
 
 d = datetime.date.today()
 t = datetime.datetime.now()
+raw_data_path = os.path.join(os.getcwd(), "raw_data")
 
-country_df = pd.read_csv(os.path.join(RAW_DATA_PATH,  'country_codes/all.csv'))
+country_df = pd.read_csv(os.path.join(raw_data_path,  'country_codes/all.csv'))
 country_df = country_df[country_df.region == 'Africa'].copy()
 country_df = country_df.sort_values(by = 'name')[['name', 'alpha-3']]
 
@@ -24,11 +25,11 @@ st.write('You selected:', country_df[country_df.name == country]['alpha-3'].valu
 percentage = 10
 percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
 
-path = os.path.join(RAW_DATA_PATH,  'gps_locations/gps_weight_CIV_0.7.csv')
+path = os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.7.csv')
 if (percentage <= 7):
-   path =  os.path.join(RAW_DATA_PATH,  'gps_locations/gps_weight_CIV_0.07.csv')
+   path =  os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.07.csv')
 elif (percentage <= 11):
-   path =  os.path.join(RAW_DATA_PATH,  'gps_locations/gps_weight_CIV_0.11.csv')
+   path =  os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.11.csv')
 
 top_producers_df = pd.read_csv(path)
 st.map(top_producers_df)
