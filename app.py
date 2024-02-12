@@ -11,7 +11,7 @@ from pathlib import Path
 
 d = datetime.date.today()
 t = datetime.datetime.now()
-raw_data_path = os.path.join(os.getcwd(), "raw_data")
+top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 
 if (Path(country_data_path).is_file()):
@@ -28,11 +28,11 @@ if (Path(country_data_path).is_file()):
 percentage = 10
 percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
 
-path = os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.7.csv')
+path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
 if (percentage <= 7):
-   path =  os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.07.csv')
+   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
 elif (percentage <= 11):
-   path =  os.path.join(raw_data_path,  'gps_locations/gps_weight_CIV_0.11.csv')
+   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.11.csv')
 
 if (Path(path).is_file()):
     top_producers_df = pd.read_csv(path)
