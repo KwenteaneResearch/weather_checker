@@ -11,6 +11,7 @@ colorama
 #time           #utils.py
 #dateutil
 #pathlib
+gdown
 
 # Geo Data
 geopandas

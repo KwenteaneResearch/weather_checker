@@ -17,13 +17,14 @@ from sklearn.cluster import KMeans
 
 from weather_checker.params import *
 
-def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='local'):
+def restore_raw_weather_data(lat_list:list, lon_list:list, prod_list:list, raw_storage:str='local'):
     if len(lat_list) != len(lon_list):
         print(f"❌ restore_raw_weather_data function doesn't have same lenght for lat_list:{len(lat_list)} and lon_list:{len(lat_list)}")
         return None
 
     lat_missing = lat_list.copy()
     lon_missing = lon_list.copy()
+    prod_missing = prod_list.copy()
     loaded = 0
 
     pre_loaded_data = pd.DataFrame()
@@ -42,6 +43,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='loca
                 pre_loaded_data = pd.concat([pre_loaded_data,df])
                 lat_missing.remove(lat_list[i])
                 lon_missing.remove(lon_list[i])
+                prod_missing.remove(prod_list[i])
                 loaded =+ 1
 
 
@@ -57,7 +59,7 @@ def restore_raw_weather_data(lat_list:list, lon_list:list, raw_storage:str='loca
     else :
         print(f"❌ Not able to restore any raw weather data")
 
-    return pre_loaded_data, lat_missing, lon_missing, loaded
+    return pre_loaded_data, lat_missing, lon_missing, prod_missing, loaded
 
 
 
@@ -175,7 +177,7 @@ def climatology_build(weather_per_location, lat_list, lon_list, prod):
     for locations in range(len(lat_list)):
         lat_mask = weather_per_location['lat']==lat_list[locations]
         lon_mask = weather_per_location['lon']==lon_list[locations]
-        weather_point = weather_per_location[lat_mask & lon_mask]
+        weather_point = weather_per_location[lat_mask & lon_mask].copy()
 
         #############
         #TO DO Add a condition if weather_point is empty to BREAK
@@ -219,17 +221,17 @@ def climatology_build(weather_per_location, lat_list, lon_list, prod):
 
     return country_climatology
 
-def save_load_climatology(save:bool=True, total_weight:float=0.1, climat=pd.DataFrame()):
+def save_load_climatology(save:bool=True, country:str='CIV', sample_weight:float=0.05, climat=pd.DataFrame()):
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
-    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{COUNTRY}_{total_weight}_{min_date}_{max_date}.csv")
+    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{country}_{sample_weight}_{min_date}_{max_date}.csv")
     if save :
         if climat.shape[0] > 1:
             climat.to_csv(cache_path, header=True)
-            print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} saved")
+            print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} saved")
     else :
         if cache_path.is_file():
             climat = pd.read_csv(cache_path)
-            print(f"✅ climatology of weight {total_weight} from {min_date} to {max_date} loaded")
+            print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} loaded")
             return climat
     return pd.DataFrame()
