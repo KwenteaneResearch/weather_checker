@@ -15,8 +15,6 @@ from weather_checker.climatology.geo_to_climate import *
 from weather_checker.climatology.models import *
 
 
-
-
 def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
 
     reduced = False
