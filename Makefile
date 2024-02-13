@@ -63,6 +63,8 @@ reset_pdf_reports:
 
 init_all_data_folders: reset_input_csv reset_raw_data reset_raw_weather reset_gps_locations reset_pdf_reports
 
+####
+
 init_gdown:
 	mkdir -p ~/.cache/gdown/
 	mv cookies.txt ~/.cache/gdown/
@@ -99,6 +101,8 @@ docker_sh_dev:
 
 docker_run_dev:
 	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev
+
+########## STREAMLIT ##########
 
 streamlit:
 	-@streamlit run app.py
