@@ -10,60 +10,69 @@ from sklearn.cluster import KMeans
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import MinMaxScaler
 
-#from tslearn.utils import to_time_series_dataset
-#from tslearn.clustering import TimeSeriesKMeans
-#from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+from weather_checker.climatology.geo_to_climate import *
 
 
+def analog_years (country_code:str='CIV',sample_weight:float=0.05):
 
-def group_index_to_list(group):
-    """ Translating the family groups back into lists of years"""
-    return list(group.index)
+    min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
+    max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d')
+    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{country_code}_{sample_weight}_{min_date}_{max_date}.csv")
 
+    if cache_path.is_file()==False:
+        print(f"❌ climatology of weight {sample_weight} from {min_date} to {max_date} not found, please create climatology first")
+        return None
+    else:
+        climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight,8))
 
-def k_means(cocoa_climatology):
+    #calling & fitting the classification model
     km = KMeans(n_clusters=5)
-    km.fit(cocoa_climatology)
-    
-    cocoa_similar_years = cocoa_climatology.copy()
+    km.fit(climatology)
+    #translating the family groups back into a dictionary with families as keys and years as lists
+    cocoa_similar_years = climatology.copy()
     cocoa_similar_years["year_group"] = km.labels_
-    grouped_index_lists = cocoa_similar_years.groupby('year_group').apply(group_index_to_list, include_groups = False)
+    year_family = cocoa_similar_years.groupby('year_group')
+    year_family = year_family.groups
+    print(year_family)
 
-    for i in range(len(grouped_index_lists)):
-        print(f"{i} {grouped_index_lists[i]}")
-        
-    #building a dictionary showing a weather characteristic for each family
-    rain_season_cumul = {}
-    for i in range(len(grouped_index_lists)):
-        crop_years = grouped_index_lists[i]
-        rain_season_type = cocoa_similar_years[cocoa_climatology.index.isin(crop_years)]
-        rain_season_cumul[i] = rain_season_type["rain_season_weighted"].mean()
-    rain_season_cumul
-        
-    return rain_season_cumul, grouped_index_lists
+    #associating a weather metric to each family
+    weather_classification_dict = {}
+    for i in range(len(year_family)):
+        crop_years = list(year_family.keys())[i]
+        rain_season_type = cocoa_similar_years[cocoa_similar_years.index.isin(year_family[crop_years])]
+        weather_classification_dict[i] = rain_season_type["rain_season_weighted"].mean()
 
-def outliers(cocoa_climatology):
+    print(weather_classification_dict)
+
+    #returning the two dictionaries
+    return year_family, weather_classification_dict
+
+
+def outliers(country_code:str='CIV',sample_weight:float=0.05):
+
+    min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
+    max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d')
+    cache_path = Path(RAW_DATA_PATH).joinpath("climatologies", f"climatology_{country_code}_{sample_weight}_{min_date}_{max_date}.csv")
+
+    if cache_path.is_file()==False:
+        print(f"❌ climatology of weight {sample_weight} from {min_date} to {max_date} not found, please create climatology first")
+        return None
+    else:
+        climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight,8))
+
     #detecting outliers from the weather dataset
     sk_outlier = LocalOutlierFactor()
-    outliers = sk_outlier.fit_predict(cocoa_climatology)
-    
+    outliers = sk_outlier.fit_predict(climatology)
+
     #extracting the list of outliers as years
-    cocoa_years = cocoa_climatology.index.tolist()
+    cocoa_years = climatology.index.tolist()
     cocoa_years_outliers = []
     for item1, item2 in zip(outliers, cocoa_years):
         if item1 == -1:
             cocoa_years_outliers.append(item2)
-    #cocoa_years_outliers
-    
+
     #creating a new dataframe only showing the outlier years weather features
-    climatology_outliers = cocoa_climatology.loc[cocoa_years_outliers]
+    climatology_outliers = climatology.loc[cocoa_years_outliers]
 
-    #scaling the features for better display in a chart
-    scaler = MinMaxScaler(feature_range=(0, 5))
-    climatology_outliers_scaled = pd.DataFrame(scaler.fit_transform(climatology_outliers))
-    
-    #putting back the index as the outlier years
-    climatology_outliers_scaled = climatology_outliers_scaled.set_index(keys = [cocoa_years_outliers])
-    #climatology_outliers_scaled
-
-    return climatology_outliers_scaled, cocoa_years_outliers
+    print(cocoa_years_outliers)
+    return cocoa_years_outliers
