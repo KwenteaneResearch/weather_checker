@@ -13,7 +13,7 @@ RAW_WEATHER_STORAGE="local"
 
 RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
-METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_mean", "precipitation_sum"]
+METEO_COLUMNS_DAILY = ["weather_code","precipitation_sum"] #"temperature_2m_mean"
 
 COUNTRY_PRODUCTION = {"CIV":1879953.901,
                       "GHA":895249.9013,
