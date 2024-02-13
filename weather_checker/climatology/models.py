@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from weather_checker.climatology.geo_to_climate import *
 
 
-def analog_years (country_code:str='CIV',sample_weight:float=0.05):
+def analog_years (country_code:str='CIV',sample_weight:float=0.1):
 
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d')
@@ -48,7 +48,8 @@ def analog_years (country_code:str='CIV',sample_weight:float=0.05):
     return year_family, weather_classification_dict
 
 
-def outliers(country_code:str='CIV',sample_weight:float=0.05):
+
+def outliers(country_code:str='CIV',sample_weight:float=0.1):
 
     min_date = parse(METEO_START_DATE).strftime('%Y-%m-%d') # e.g '2009-01-01'
     max_date = parse(METEO_END_DATE).strftime('%Y-%m-%d')

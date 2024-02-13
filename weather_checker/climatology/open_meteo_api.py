@@ -87,7 +87,7 @@ def get_daily_data():
     lon_list = df["longitude"].tolist()
     prod_list = df["prod"].tolist()
 
-    pre_loaded_data, lat_missing, lon_missing, prod_missing, pre_loaded_location = restore_raw_weather_data(lat_list, lon_list, RAW_WEATHER_STORAGE)
+    pre_loaded_data, lat_missing, lon_missing, prod_missing, pre_loaded_location = restore_raw_weather_data(lat_list, lon_list, prod_list, RAW_WEATHER_STORAGE)
     daily_weather = pd.DataFrame()
     if len(lat_missing) > 0 :
         print(f"API call for latidudes : {lat_missing} \nlongitudes : {lon_missing}")

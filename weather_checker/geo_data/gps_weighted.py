@@ -42,6 +42,3 @@ def load_gps(country_code:str='CIV', sample_weight:float=0.1):
 
     print(f"✅ GPS Locations of total weight {np.round(sample_weight,4)} of {country_code} loaded")
     return lat_list, lon_list, prod_list
-
-
-

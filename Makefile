@@ -21,7 +21,11 @@ run_outliers:
 
 run_all: run_get_climatology
 
+run_collect_reports:
+	python -c 'from weather_checker.nlp.report_summary import get_monthly_reports; get_monthly_reports()'
 
+run_get_summary:
+		python -c 'from weather_checker.nlp.report_summary import get_monthly_summary; get_monthly_summary()'
 
 #run_workflow:
 #	PREFECT__LOGGING__LEVEL=${PREFECT_LOG_LEVEL} python -m taxifare.interface.workflow
@@ -98,6 +102,7 @@ docker_build:
 
 docker_sh_dev:
 	docker run -it -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev sh
+
 
 docker_run_dev:
 	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev

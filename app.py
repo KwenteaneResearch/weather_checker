@@ -13,6 +13,9 @@ from_date = datetime.date.today()
 to_date = datetime.datetime.today()
 top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
+gpt_key = st.secrets['gpt_key']
+st.write(gpt_key)
+
 
 if (Path(country_data_path).is_file()):
     country_df = pd.read_csv(country_data_path)
@@ -54,7 +57,7 @@ with col1:
     from_date)
 with col2:
     to_date = st.date_input(
-    'to',
+    'To',
     to_date)
 
 url = 'https://taxifare.lewagon.ai/predict'

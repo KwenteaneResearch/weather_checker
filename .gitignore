@@ -23,3 +23,6 @@ __pycache__
 *.vscode
 *.zip
 *.gz
+
+.streamlit/secrets.toml
+
