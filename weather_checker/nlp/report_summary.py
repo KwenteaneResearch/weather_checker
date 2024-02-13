@@ -48,7 +48,7 @@ def get_monthly_reports(year=2016,month="02"):
 
     return comments_db_monthly,files_not_processed
 
-def get_monthly_summary(year=2016,month="02"):
+def get_monthly_summary(openai_api_key,year=2016,month="02"):
 
     cache_path = Path(RAW_DATA_PATH).joinpath("pdf_reports",f"{year}_{month}_extracted_reports.csv")
     if cache_path.is_file()==False:
@@ -61,7 +61,7 @@ def get_monthly_summary(year=2016,month="02"):
         reports_to_summarise = reports_to_summarise["0"].tolist()
 
     #instantiating the model
-    openai_api_key = os.getenv('OPENAI_API_KEY')
+    #openai_api_key = os.getenv('OPENAI_API_KEY')
     llm_openai = OpenAI(model ="gpt-3.5-turbo-instruct",temperature=0, openai_api_key=openai_api_key)
 
     #using a complex prompt for the summarize chain using map_reduce with OpenAI
