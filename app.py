@@ -13,8 +13,7 @@ from_date = datetime.date.today()
 to_date = datetime.datetime.today()
 top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
-gpt_key = st.secrets['gpt_key']
-st.write(gpt_key)
+openai_api_key = st.secrets['openai_api_key']
 
 if (Path(country_data_path).is_file()):
     country_df = pd.read_csv(country_data_path)
@@ -69,6 +68,7 @@ if st.button('Get climate!'):
     params = {"country_code": country_df[country_df.name == country]['alpha-3'].values[0],
               "from_date": from_date.strftime("%Y-%m-%d"),
               "to_date": to_date.strftime("%Y-%m-%d"),
+              "openai_api_key": openai_api_key,
               "sample_weight": percentage,
               "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
