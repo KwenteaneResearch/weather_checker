@@ -64,10 +64,10 @@ url = 'https://taxifare.lewagon.ai/predict'
     # st.markdown('Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...')
 
 if st.button('Get climate!'):
-    params = {"country": country_df[country_df.name == country]['alpha-3'].values[0],
+    params = {"country_code": country_df[country_df.name == country]['alpha-3'].values[0],
               "from_date": from_date.strftime("%Y-%m-%d"),
               "to_date": to_date.strftime("%Y-%m-%d"),
-              "percentage": percentage,
+              "sample_weight": percentage,
               "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
     response = requests.get(url, params=params)
