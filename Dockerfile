@@ -41,7 +41,7 @@ COPY Makefile Makefile
 #RUN make dl_gps_locations
 
 
-CMD uvicorn weather_checker.api.fast:app --host 0.0.0.0
+CMD uvicorn weather_checker.api.fast:app --host 0.0.0.0 --port $PORT
 
 
 #FROM tensorflow/tensorflow:2.10.0
