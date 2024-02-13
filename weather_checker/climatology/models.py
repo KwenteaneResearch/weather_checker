@@ -33,7 +33,10 @@ def analog_years (country_code:str='CIV',sample_weight:float=0.1):
     cocoa_similar_years["year_group"] = km.labels_
     year_family = cocoa_similar_years.groupby('year_group')
     year_family = year_family.groups
-    print(year_family)
+    year_family_list = [{k:list(v)} for k,v in year_family.items()]
+
+    #print(year_family)
+    print(year_family_list)
 
     #associating a weather metric to each family
     weather_classification_dict = {}
@@ -41,11 +44,12 @@ def analog_years (country_code:str='CIV',sample_weight:float=0.1):
         crop_years = list(year_family.keys())[i]
         rain_season_type = cocoa_similar_years[cocoa_similar_years.index.isin(year_family[crop_years])]
         weather_classification_dict[i] = rain_season_type["rain_season_weighted"].mean()
-
+        #weather_classification_list = [(k,v) for k,v in weather_classification_dict.items()]
     print(weather_classification_dict)
+    #print(weather_classification_list)
 
-    #returning the two dictionaries
-    return year_family, weather_classification_dict
+    #returning the two lists
+    return year_family_list, weather_classification_dict #year_family
 
 
 

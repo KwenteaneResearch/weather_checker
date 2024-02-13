@@ -1,4 +1,6 @@
 import pandas as pd
+import json
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from weather_checker.interface.main import *
@@ -44,7 +46,7 @@ def locations(country_code:str='CIV', sample_weight:float=0.1):
 
     return {"latitude":lat_list,"longitude":lon_list}
 
-get("/compute_climatology")
+@app.get("/compute_climatology")
 def climatology(country_code:str='CIV', sample_weight:float=0.1):
     """
     Compute the climatology for a country and a sample_weight.
@@ -58,10 +60,10 @@ def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
     """
     running the classification of years and identifying outliers
     """
-    year_groups_dict, weather_metric_dict = analog_years(country_code,sample_weight)
+    year_groups, weather_metric = analog_years(country_code,sample_weight)
     cocoa_years_outliers = outliers(country_code,sample_weight)
 
-    return {"families_of_years":year_groups_dict,"family_rain_season_rainfall":weather_metric_dict,"outlier_years":cocoa_years_outliers}
+    return {"families_of_years":year_groups,"family_rain_season_rainfall":weather_metric,"outlier_years":cocoa_years_outliers}
 
 
 @app.get("/get_monthly_summary")
@@ -70,7 +72,7 @@ def get_reports(openai_api_key:str, year=2016, month="02"):
     collecting the reports for a given year and month and storing the extracted text part in a .csv file
     summarising the reports with map_reduce technique using OpenAPI
     """
-    get_monthly_reports(openai_api_key,year,month)
+    get_monthly_reports(year,month)
     summary = get_monthly_summary(openai_api_key,year,month)
 
     return {"month":f"reports collected for{year}-{month}","monthly_summary": summary}

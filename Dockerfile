@@ -29,9 +29,9 @@ COPY Makefile .
 #RUN make init_all_data_folders
 #RUN make run_params
 
-# Initialize folder 
+# Initialize folder
 COPY Makefile Makefile
-RUN make init_all_data_folders
+#RUN make init_all_data_folders
 
 
 #COPY cookies.txt cookies.txt

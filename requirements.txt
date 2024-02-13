@@ -1,5 +1,5 @@
 ipdb
-jupyterlab
+#jupyterlab
 matplotlib
 seaborn
 numpy==1.23.5
@@ -16,7 +16,7 @@ langchain
 pypdf
 
 # Geo Data
-geopandas
+#geopandas
 
 # Open Meteo API
 requests
@@ -28,7 +28,9 @@ retry-requests
 mlflow==2.1.1
 prefect==2.14.9
 
-
+#NLP Analysis
+openai
+tiktoken
 
 # API
 fastapi==0.108.0
