@@ -24,7 +24,6 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.1):
     print(Fore.BLUE + f"Running get_climatology()..." + Style.RESET_ALL)
     #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
     lat_list, lon_list, prod_list = load_gps(country_code, np.round(sample_weight,8))
-
     climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight,8))
 
 

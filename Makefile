@@ -101,7 +101,8 @@ docker_build:
 	docker build --tag=${GAR_IMAGE}:dev .
 
 docker_sh_dev:
-	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:dev sh
+	docker run -it -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev sh
+
 
 docker_run_dev:
 	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev

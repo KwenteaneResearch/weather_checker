@@ -44,7 +44,9 @@ def get_monthly_reports(year=2016,month="02"):
     #exporting to csv
     comments_db_monthly_df = pd.DataFrame(comments_db_monthly)
     comments_db_monthly_df.to_csv(path_or_buf=Path(RAW_DATA_PATH).joinpath("pdf_reports",f"{year}_{month}_extracted_reports.csv"),index=False)
+
     print(f"✅reports collected and saved")
+
 
     return comments_db_monthly,files_not_processed
 
@@ -66,9 +68,13 @@ def get_monthly_summary(openai_api_key,year=2016,month="02"):
 
     #using a complex prompt for the summarize chain using map_reduce with OpenAI
     map_prompt_template = """
+
+                        Write a summary of this chunk of text that includes the main points and any important details about weather.
+=======
                         You are a cocoa commodity market analyst
                         Write a summary of this chunk of text and include any information about weather that you find in the text.
                         Please indicate the date of the text which is indicated at the beginning in date of report
+
                         {text}
                         """
 
@@ -96,6 +102,7 @@ def get_monthly_summary(openai_api_key,year=2016,month="02"):
     )
     #splitting documents and displaying
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=2500, chunk_overlap=300)
+
     docs = text_splitter.create_documents(reports_to_summarise)
     docs = text_splitter.split_documents(docs)
     num_docs = len(docs)

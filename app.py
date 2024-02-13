@@ -15,6 +15,7 @@ top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_locat
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 openai_api_key = st.secrets['openai_api_key']
 
+
 if (Path(country_data_path).is_file()):
     country_df = pd.read_csv(country_data_path)
     country_df = country_df[country_df.region == 'Africa'].copy()

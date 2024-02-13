@@ -9,7 +9,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 
 # local or big_query
-RAW_WEATHER_STORAGE="local"
+RAW_WEATHER_STORAGE='local'
 
 RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
@@ -25,7 +25,9 @@ COUNTRY_PRODUCTION = {"CIV":1879953.901,
 # Geo Data Params
 # Percentage of cumulative weight processed
 DATA_SIZE = 0.05
-COUNTRY = "CIV" 
+
+COUNTRY = "CIV"
+
 
 # Open Meteo API
 OPEN_METEO_URL = "https://archive-api.open-meteo.com/v1/archive"
@@ -45,10 +47,22 @@ env_valid_options = dict(
 )
 
 def validate_env_value(env, valid_options):
+    env_value = os.environ.get(env)
+    if env_value not in valid_options:
+        #raise NameError(f"INSIDE Invalid value for {env}{os.environ[env]} in `.env` file: {env_value} must be in {valid_options}")
+        raise NameError(f"env:{env} func:{os.environ[env]} file: {env_value} valid_opt: {valid_options}")
+
+
+'''def validate_env_value(env, valid_options):
     env_value = os.environ[env]
     if env_value not in valid_options:
-        raise NameError(f"Invalid value for {env} in `.env` file: {env_value} must be in {valid_options}")
+        raise NameError(f"Invalid value for {env} in `.env` file: {env_value} must be in {valid_options}")'''
 
 
 for env, valid_options in env_valid_options.items():
     validate_env_value(env, valid_options)
+
+
+if __name__=="__main__":
+    for env, valid_options in env_valid_options.items():
+        validate_env_value(env, valid_options)
