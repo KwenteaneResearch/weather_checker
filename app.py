@@ -9,8 +9,8 @@ from pathlib import Path
 # Weather checker Streamlit frontend
 '''
 
-d = datetime.date.today()
-t = datetime.datetime.now()
+from_date = datetime.date.today()
+to_date = datetime.datetime.today()
 top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 
@@ -28,6 +28,14 @@ if (Path(country_data_path).is_file()):
 percentage = 10
 percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
 
+weather_events = ['Strong', 'Average daily temperature', 'Precipitation']
+weather_event_codes = ['weather_code', 'temperature_2m_mean', 'precipitation_sum']
+weather_event = st.selectbox(
+    'Select weather event intensity',
+    weather_events)
+st.write('You selected:', weather_event_codes[weather_events.index(weather_event)])
+
+
 path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
 if (percentage <= 7):
    path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
@@ -38,15 +46,16 @@ if (Path(path).is_file()):
     top_producers_df = pd.read_csv(path)
     st.map(top_producers_df)
 
+st.write('Select climatology range')
 col1, col2 = st.columns(2)
 with col1:
-    d = st.date_input(
-    "Pick up date",
-    d)
+    from_date = st.date_input(
+    "From",
+    from_date)
 with col2:
-    t = st.time_input(
-    'Pick up time',
-    t)
+    to_date = st.date_input(
+    'to',
+    to_date)
 
 url = 'https://taxifare.lewagon.ai/predict'
 
@@ -56,8 +65,10 @@ url = 'https://taxifare.lewagon.ai/predict'
 
 if st.button('Get climate!'):
     params = {"country": country_df[country_df.name == country]['alpha-3'].values[0],
-              "pickup_datetime": datetime.datetime.combine(d, t).strftime("%Y-%m-%d %H:%M:%S"),
-              "percentage": percentage
+              "from_date": from_date.strftime("%Y-%m-%d"),
+              "to_date": to_date.strftime("%Y-%m-%d"),
+              "percentage": percentage,
+              "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
     response = requests.get(url, params=params)
     st.write(f'Status code {response.status_code}')
