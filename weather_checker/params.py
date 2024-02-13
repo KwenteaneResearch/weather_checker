@@ -17,6 +17,8 @@ METEO_END_DATE = os.environ.get("METEO_END_DATE")
 GAR_IMAGE = os.environ.get("GAR_IMAGE")
 GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
+REPORTS_YEAR = os.environ.get("REPORTS_YEAR")
+
 
 ##################  CONSTANTS  #####################
 

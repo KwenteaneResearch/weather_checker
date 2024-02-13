@@ -12,6 +12,8 @@ colorama
 #dateutil
 #pathlib
 gdown
+langchain
+pypdf
 
 # Geo Data
 geopandas
@@ -19,7 +21,7 @@ geopandas
 # Open Meteo API
 requests
 openmeteo-requests
-requests-cache 
+requests-cache
 retry-requests
 
 # Model lifecycle
