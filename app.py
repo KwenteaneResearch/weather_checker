@@ -9,8 +9,7 @@ from pathlib import Path
 # Weather checker Streamlit frontend
 '''
 
-from_date = datetime.date.today()
-to_date = datetime.datetime.today()
+market_reports_date = datetime.date.today() - datetime.timedelta(days=8*365+2)
 top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 openai_api_key = st.secrets['openai_api_key']
@@ -21,43 +20,42 @@ if (Path(country_data_path).is_file()):
     country_df = country_df[country_df.region == 'Africa'].copy()
     country_df = country_df.sort_values(by = 'name')[['name', 'alpha-3']]
 
+    default_country_index = 0
+    if(country_df.size > 14):
+        default_country_index = 14 # "Côte d'Ivoire"
     country = st.selectbox(
         'Select a country',
-        country_df)
+        country_df,
+        index = default_country_index)
 
-    st.write('You selected:', country_df[country_df.name == country]['alpha-3'].values[0])
+    # st.write('You selected:', country_df[country_df.name == country]['alpha-3'].values[0])
+
+# weather_events = ['Strong', 'Average daily temperature', 'Precipitation']
+# weather_event_codes = ['weather_code', 'temperature_2m_mean', 'precipitation_sum']
+# weather_event = st.selectbox(
+#     'Select weather event intensity',
+#     weather_events)
+# st.write('You selected:', weather_event_codes[weather_events.index(weather_event)])
+
+
+# path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
+# if (percentage <= 7):
+#    path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
+# elif (percentage <= 11):
+#    path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.11.csv')
+
+# if (Path(path).is_file()):
+#     top_producers_df = pd.read_csv(path)
+#     st.map(top_producers_df)
 
 percentage = 10
-percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
-
-weather_events = ['Strong', 'Average daily temperature', 'Precipitation']
-weather_event_codes = ['weather_code', 'temperature_2m_mean', 'precipitation_sum']
-weather_event = st.selectbox(
-    'Select weather event intensity',
-    weather_events)
-st.write('You selected:', weather_event_codes[weather_events.index(weather_event)])
-
-
-path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
-if (percentage <= 7):
-   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
-elif (percentage <= 11):
-   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.11.csv')
-
-if (Path(path).is_file()):
-    top_producers_df = pd.read_csv(path)
-    st.map(top_producers_df)
-
-st.write('Select climatology range')
 col1, col2 = st.columns(2)
 with col1:
-    from_date = st.date_input(
-    "From",
-    from_date)
+    percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
 with col2:
-    to_date = st.date_input(
-    'To',
-    to_date)
+    market_reports_date = st.date_input(
+    "Market report summary for the month",
+    market_reports_date)
 
 url_location = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/collect_locations'
 # url_location = 'http://localhost:8000/collect_locations'
@@ -72,24 +70,24 @@ url_monthly_summary = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/get_month
 
 if st.button('Get climate!'):
     params = {"country_code": country_df[country_df.name == country]['alpha-3'].values[0],
-              "from_date": from_date.strftime("%Y-%m-%d"),
-              "to_date": to_date.strftime("%Y-%m-%d"),
+              "year": market_reports_date.year,
+              "month": f'{market_reports_date.month:02d}',
               "openai_api_key": openai_api_key,
-              "sample_weight": percentage/100,
-              "weather_event": weather_event_codes[weather_events.index(weather_event)]
+              "sample_weight": percentage/100
+            #   "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
     response = requests.get(url_location, params=params)
-    # st.write(f'Status code {response.status_code}')
-    st.markdown(f"{response.json()}")
+    if(response.status_code == 200):
+        st.markdown(f"{response.json()}")
 
     response = requests.get(url_climatology, params=params)
-    # st.write(f'Status code {response.status_code}')
-    st.markdown(f"{response.json()}")
+    if(response.status_code == 200):
+        st.markdown(f"{response.json()}")
 
     response = requests.get(url_years, params=params)
-    # st.write(f'Status code {response.status_code}')
-    st.markdown(f"{response.json()}")
+    if(response.status_code == 200):
+        st.markdown(f"{response.json()}")
 
     response = requests.get(url_monthly_summary, params=params)
-    # st.write(f'Status code {response.status_code}')
-    st.markdown(f"{response.json()}")
+    if(response.status_code == 200):
+        st.markdown(f"{response.json()['monthly_summary']}")
