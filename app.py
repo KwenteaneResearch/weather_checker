@@ -76,7 +76,7 @@ if st.button('Get climate!'):
         st.markdown(f'#### Total rain season rainfall (mm) for each analog group:')
         for element in response.json()['family_rain_season_rainfall']:
             st.write(f"{element} -> {response.json()['family_rain_season_rainfall'][str(element)]}")
-        st.markdown(f'#### Outlier years:')
+        st.markdown(f'#### Outlier years based on precipitation amount and intensity:')
         st.markdown(f"{response.json()['outlier_years']}")
 
     if(run_openai):
