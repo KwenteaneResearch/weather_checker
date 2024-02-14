@@ -29,26 +29,6 @@ if (Path(country_data_path).is_file()):
         country_df,
         index = default_country_index)
 
-    # st.write('You selected:', country_df[country_df.name == country]['alpha-3'].values[0])
-
-# weather_events = ['Strong', 'Average daily temperature', 'Precipitation']
-# weather_event_codes = ['weather_code', 'temperature_2m_mean', 'precipitation_sum']
-# weather_event = st.selectbox(
-#     'Select weather event intensity',
-#     weather_events)
-# st.write('You selected:', weather_event_codes[weather_events.index(weather_event)])
-
-
-# path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
-# if (percentage <= 7):
-#    path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
-# elif (percentage <= 11):
-#    path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.11.csv')
-
-# if (Path(path).is_file()):
-#     top_producers_df = pd.read_csv(path)
-#     st.map(top_producers_df)
-
 percentage = 10
 col1, col2 = st.columns(2)
 with col1:
@@ -59,15 +39,9 @@ with col2:
     market_reports_date)
 
 url_location = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/collect_locations'
-# url_location = 'http://localhost:8000/collect_locations'
 url_climatology = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/compute_climatology'
 url_years = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/years_classification'
-# url_years = 'localhost:8000/years_classification'
 url_monthly_summary = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/get_monthly_summary'
-
-# if url == 'https://taxifare.lewagon.ai/predict':
-
-    # st.markdown('Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...')
 
 if st.button('Get climate!'):
     params = {"country_code": country_df[country_df.name == country]['alpha-3'].values[0],
@@ -75,21 +49,21 @@ if st.button('Get climate!'):
               "month": f'{market_reports_date.month:02d}',
               "openai_api_key": openai_api_key,
               "sample_weight": percentage/100
-            #   "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
-    # response = requests.get(url_location, params=params)
-    # if(response.status_code == 200):
-    #     # longitude = response.json()['longitude']
-    #     # latitude = response.json()['latitude']
-    #     # st.markdown(f"{response.json()}")
-    #     st.markdown(f'### Top {percentage}% production locations in {country}:')
-    #     st.map(pd.DataFrame.from_dict(response.json()))
-    #     # st.markdown(f"{longitude}")
 
-    # response = requests.get(url_climatology, params=params)
-    # if(response.status_code == 200):
-    #     st.markdown(f'### Climatology for top {percentage}% production locations in {country}:')
-    #     st.markdown(f"{response.json()['climatology']}")
+    response = requests.get(url_location, params=params)
+    if(response.status_code == 200):
+        # longitude = response.json()['longitude']
+        # latitude = response.json()['latitude']
+        # st.markdown(f"{response.json()}")
+        st.markdown(f'### Top {percentage}% production locations in {country}:')
+        st.map(pd.DataFrame.from_dict(response.json()))
+        # st.markdown(f"{longitude}")
+
+    response = requests.get(url_climatology, params=params)
+    if(response.status_code == 200):
+        st.markdown(f'### Climatology for top {percentage}% production locations in {country}:')
+        st.markdown(f"{response.json()['climatology']}")
 
     response = requests.get(url_years, params=params)
     if(response.status_code == 200):
@@ -106,5 +80,5 @@ if st.button('Get climate!'):
 
     response = requests.get(url_monthly_summary, params=params)
     if(response.status_code == 200):
-        st.markdown(f'### Weather reports for {market_reports_date} summarized by OpenAI:')
+        st.markdown(f'### Weather reports for {market_reports_date.strftime("%B %Y")} summarized by OpenAI:')
         st.markdown(f"{response.json()['monthly_summary']}")
