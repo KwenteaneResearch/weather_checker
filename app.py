@@ -78,7 +78,7 @@ if st.button('Get climate!'):
         st.markdown(f'#### Outlier years:')
         st.markdown(f"{response.json()['outlier_years']}")
 
-    response = requests.get(url_monthly_summary, params=params)
+    # response = requests.get(url_monthly_summary, params=params)
     if(response.status_code == 200):
         st.markdown(f'### Weather reports for {market_reports_date.strftime("%B %Y")} summarized by OpenAI:')
         st.markdown(f"{response.json()['monthly_summary']}")
