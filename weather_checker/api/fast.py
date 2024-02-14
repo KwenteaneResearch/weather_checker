@@ -34,9 +34,6 @@ app.add_middleware(
 )
 
 
-
-# http://127.0.0.1:8000/predict?pickup_datetime=2012-10-06 12:10:20&pickup_longitude=40.7614327&pickup_latitude=-73.9798156&dropoff_longitude=40.6513111&dropoff_latitude=-73.8803331&passenger_count=2
-
 @app.get("/collect_locations")
 def locations(country_code:str='CIV', sample_weight:float=0.1):
     """
@@ -56,7 +53,7 @@ def climatology(country_code:str='CIV', sample_weight:float=0.1):
     if country_code not in country_list:
         errors["Incorrect input country_code"] = f"{country_code} not in list {country_list}"
     if sample_weight > 0.1 :
-        errors["Incorrect input sample_weight"] = f"{sample_weight} should not be above 0.1 as we only cover 10% max of CIV locations"
+        errors["Incorrect input sample_weight"] = f"{sample_weight} should not be above 0.1 as we only cover 10% max of countries locations"
     
     if len(errors) > 0:
         return errors
@@ -93,8 +90,8 @@ def get_reports(openai_api_key:str, year:int=2016, month:str="02"):
     """
     # Fallbacks
     errors = {}
-    if year < 2016 or year > 2023:
-        errors["Incorrect input year"] = f"{year} not in range 2016 - 2023"
+    if year != 2016 :
+        errors["Incorrect input year"] = f"{year} not 2016"
     month_list = ["01","02","03","04","05","06","07","08","09","10","11","12"]
     if month not in month_list:
         errors["Incorrect input month"] = f"{month} not in list {month_list}"
