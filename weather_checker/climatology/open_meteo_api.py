@@ -101,7 +101,6 @@ def get_daily_data():
     return None
 
 
-
 if __name__ == '__main__':
     #compute_csv_files()
-    get_daily_data()
+    compute_csv_files()

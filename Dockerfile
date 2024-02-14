@@ -14,6 +14,7 @@ RUN pip install -r requirements.txt
 # Then only, install weather_checker!
 COPY weather_checker weather_checker
 COPY setup.py setup.py
+COPY input_csv input_csv
 COPY raw_data raw_data
 #RUN pip install .
 
