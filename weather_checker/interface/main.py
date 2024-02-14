@@ -15,7 +15,7 @@ from weather_checker.climatology.geo_to_climate import *
 from weather_checker.climatology.models import *
 
 
-def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
+def get_climatology(country_code:str='CIV', sample_weight:float=0.1):
 
     reduced = False
     retrieved_locations = 0
@@ -24,8 +24,6 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
     print(Fore.BLUE + f"Running get_climatology()..." + Style.RESET_ALL)
     #print(f"lat_list:{lat_list}\n lon_list:{lon_list}\n locations_weights:{locations_weights}")
     lat_list, lon_list, prod_list = load_gps(country_code, np.round(sample_weight,8))
-
-
     climatology = save_load_climatology(save=False, country=country_code, sample_weight=np.round(sample_weight,8))
 
 
@@ -57,33 +55,7 @@ def get_climatology(country_code:str='CIV', sample_weight:float=0.05):
 
     return climatology, np.round(sample_weight,8) if not reduced else np.round(actual_percent,8)
 
-def analog_years (climatology):
-
-    #calling & fitting the classification model
-    km = KMeans(n_clusters=5)
-    km.fit(climatology)
-    #translating the family groups back into a dictionary with families as keys and years as lists
-    cocoa_similar_years = cocoa_climatology.copy()
-    cocoa_similar_years["year_group"] = km.labels_
-    year_family = cocoa_similar_years.groupby('year_group')
-    year_family = year_family.groups
-
-    #associating a weather metric to each family
-    weather_classification_dict = {}
-    for i in range(len(year_family)):
-        crop_years = list(year_family.keys())[i]
-        rain_season_type = cocoa_similar_years[cocoa_similar_years.index.isin(year_family[crop_years])]
-        weather_classification_dict[i] = rain_season_type["rain_season_weighted"].mean()
-
-    print(weather_classification_dict)
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
-    climatology = get_climatology('CIV',0.05)
+    climatology = get_climatology('CIV',0.1)

@@ -13,10 +13,19 @@ get_daily_data:
 run_get_climatology:
 	python -c 'from weather_checker.interface.main import get_climatology; get_climatology()'
 
+run_analog_years:
+	python -c 'from weather_checker.climatology.models import analog_years; analog_years()'
+
+run_outliers:
+	python -c 'from weather_checker.climatology.models import outliers; outliers()'
 
 run_all: run_get_climatology
 
+run_collect_reports:
+	python -c 'from weather_checker.nlp.report_summary import get_monthly_reports; get_monthly_reports()'
 
+run_get_summary:
+		python -c 'from weather_checker.nlp.report_summary import get_monthly_summary; get_monthly_summary()'
 
 #run_workflow:
 #	PREFECT__LOGGING__LEVEL=${PREFECT_LOG_LEVEL} python -m taxifare.interface.workflow
@@ -58,6 +67,8 @@ reset_pdf_reports:
 
 init_all_data_folders: reset_input_csv reset_raw_data reset_raw_weather reset_gps_locations reset_pdf_reports
 
+####
+
 init_gdown:
 	mkdir -p ~/.cache/gdown/
 	mv cookies.txt ~/.cache/gdown/
@@ -87,19 +98,16 @@ dl_all_data: init_gdown dl_raw_weather dl_input_csv dl_gps_locations
 
 ################### DOCKER ACTIONS ################
 docker_build:
-	docker build --tag=${GAR_IMAGE}:test .
+	docker build --tag=${GAR_IMAGE}:dev .
 
-docker_sh_light:
-	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:light sh
+docker_sh_dev:
+	docker run -it -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev sh
 
-docker_run_light:
-	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:light
+
+docker_run_dev:
+	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:dev
+
+########## STREAMLIT ##########
 
 streamlit:
 	-@streamlit run app.py
-
-docker_sh_test:
-	docker run -it -e PORT=8000 -p 8000:8000 ${GAR_IMAGE}:test sh 
-
-docker_run_test:
-	docker run -e PORT=8000 -p 8000:8000 --env-file .env ${GAR_IMAGE}:test

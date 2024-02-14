@@ -1,7 +1,11 @@
 import pandas as pd
+import json
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from weather_checker.interface.main import *
+from weather_checker.nlp.report_summary import *
+
 
 """
 from pydantic import BaseModel
@@ -32,17 +36,46 @@ app.add_middleware(
 
 
 # http://127.0.0.1:8000/predict?pickup_datetime=2012-10-06 12:10:20&pickup_longitude=40.7614327&pickup_latitude=-73.9798156&dropoff_longitude=40.6513111&dropoff_latitude=-73.8803331&passenger_count=2
+
+@app.get("/collect_locations")
+def locations(country_code:str='CIV', sample_weight:float=0.1):
+    """
+    getting the list of selected locations as gps coordinates to display on the map of the UI
+    """
+    lat_list, lon_list, prod_list = load_gps(country_code, sample_weight)
+
+    return {"latitude":lat_list,"longitude":lon_list}
+
 @app.get("/compute_climatology")
-def climatology(country_code:str='CIV', sample_weight:float=0.05):      
+def climatology(country_code:str='CIV', sample_weight:float=0.1):
     """
     Compute the climatology for a country and a sample_weight.
-    Assumes `pickup_datetime` is provided as a string by the user in "%Y-%m-%d %H:%M:%S" format
-    Assumes `pickup_datetime` implicitly refers to the "US/Eastern" timezone (as any user in New York City would naturally write)
     """
     climat, returned_weight = get_climatology(country_code,sample_weight)
-    
-    return {'predicted-fare': f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
+    return {"climatology": f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
+
+@app.get("/years_classification")
+def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
+    """
+    running the classification of years and identifying outliers
+    """
+    year_groups, weather_metric = analog_years(country_code,sample_weight)
+    cocoa_years_outliers = outliers(country_code,sample_weight)
+
+    return {"families_of_years":year_groups,"family_rain_season_rainfall":weather_metric,"outlier_years":cocoa_years_outliers}
+
+
+@app.get("/get_monthly_summary")
+def get_reports(openai_api_key:str, year=2016, month="02"):
+    """
+    collecting the reports for a given year and month and storing the extracted text part in a .csv file
+    summarising the reports with map_reduce technique using OpenAPI
+    """
+    get_monthly_reports(year,month)
+    summary = get_monthly_summary(openai_api_key,year,month)
+
+    return {"month":f"reports collected for{year}-{month}","monthly_summary": summary}
 
 @app.get("/")
 def root():

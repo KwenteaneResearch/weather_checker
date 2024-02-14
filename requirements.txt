@@ -1,5 +1,5 @@
 ipdb
-jupyterlab
+#jupyterlab
 matplotlib
 seaborn
 numpy==1.23.5
@@ -12,21 +12,25 @@ colorama
 #dateutil
 #pathlib
 gdown
+langchain
+pypdf
 
 # Geo Data
-geopandas
+#geopandas
 
 # Open Meteo API
 requests
 openmeteo-requests
-requests-cache 
+requests-cache
 retry-requests
 
 # Model lifecycle
 mlflow==2.1.1
 prefect==2.14.9
 
-
+#NLP Analysis
+openai
+tiktoken
 
 # API
 fastapi==0.108.0

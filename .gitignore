@@ -1,6 +1,7 @@
 raw_data/
 .python-version
 .env
+.env.yaml
 build/
 
 # OS generated files #
@@ -23,4 +24,5 @@ __pycache__
 *.vscode
 *.zip
 *.gz
+
 .streamlit/secrets.toml

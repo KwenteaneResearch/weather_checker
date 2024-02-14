@@ -1,28 +1,19 @@
 import os
 import numpy as np
 
-##################  VARIABLES  ##################
+##################  VARIABLES FROM .env FILE  ##################
 
-DATA_SIZE = os.environ.get("DATA_SIZE")
-COUNTRY = os.environ.get("COUNTRY")
-#COUNTRY_PROD = os.environ.get("COUNTRY_PROD")
-RAW_WEATHER_STORAGE = os.environ.get("RAW_WEATHER_STORAGE")
-
-
-OPEN_METEO_URL = os.environ.get("OPEN_METEO_URL")
-METEO_START_DATE = os.environ.get("METEO_START_DATE")
-METEO_END_DATE = os.environ.get("METEO_END_DATE")
-
-
-GAR_IMAGE = os.environ.get("GAR_IMAGE")
-GAR_MEMORY = os.environ.get("GAR_MEMORY")
-
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 ##################  CONSTANTS  #####################
 
+
+# local or big_query
+RAW_WEATHER_STORAGE='local'
+
 RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
-METEO_COLUMNS_DAILY = ["weather_code","temperature_2m_mean", "precipitation_sum"]
+METEO_COLUMNS_DAILY = ["weather_code","precipitation_sum"] #"temperature_2m_mean"
 
 COUNTRY_PRODUCTION = {"CIV":1879953.901,
                       "GHA":895249.9013,
@@ -30,6 +21,22 @@ COUNTRY_PRODUCTION = {"CIV":1879953.901,
                       "CMR":299404.9002,
                       "rest":177288.60,
                       "all":3569999.503}
+
+# Geo Data Params
+# Percentage of cumulative weight processed
+DATA_SIZE = 0.05
+
+COUNTRY = "CIV"
+
+
+# Open Meteo API
+OPEN_METEO_URL = "https://archive-api.open-meteo.com/v1/archive"
+METEO_START_DATE = "1940-01-01"
+METEO_END_DATE = "2023-12-31"
+
+
+REPORTS_YEAR = 2016
+REPORTS_MONTH = 2
 
 ################## VALIDATIONS #################
 
@@ -40,10 +47,22 @@ env_valid_options = dict(
 )
 
 def validate_env_value(env, valid_options):
+    env_value = os.environ.get(env)
+    if env_value not in valid_options:
+        #raise NameError(f"INSIDE Invalid value for {env}{os.environ[env]} in `.env` file: {env_value} must be in {valid_options}")
+        raise NameError(f"env:{env} func:{os.environ[env]} file: {env_value} valid_opt: {valid_options}")
+
+
+'''def validate_env_value(env, valid_options):
     env_value = os.environ[env]
     if env_value not in valid_options:
-        raise NameError(f"Invalid value for {env} in `.env` file: {env_value} must be in {valid_options}")
+        raise NameError(f"Invalid value for {env} in `.env` file: {env_value} must be in {valid_options}")'''
 
 
 for env, valid_options in env_valid_options.items():
     validate_env_value(env, valid_options)
+
+
+if __name__=="__main__":
+    for env, valid_options in env_valid_options.items():
+        validate_env_value(env, valid_options)

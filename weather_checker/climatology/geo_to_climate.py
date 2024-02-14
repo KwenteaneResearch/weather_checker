@@ -112,7 +112,7 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, prod_list:list, ra
         daily = response.Daily()
         daily_weather_code = daily.Variables(0).ValuesAsNumpy()
         daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
-        daily_temperature_2m_mean = daily.Variables(2).ValuesAsNumpy()
+        #daily_temperature_2m_mean = daily.Variables(2).ValuesAsNumpy()
         #daily_temperature_2m_max = daily.Variables(3).ValuesAsNumpy()
         #daily_temperature_2m_min = daily.Variables(4).ValuesAsNumpy()
 
@@ -124,7 +124,7 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, prod_list:list, ra
         )}
         daily_data["weather_code"] = daily_weather_code
         daily_data["precipitation_sum"] = daily_precipitation_sum
-        daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
+        #daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
         #daily_data["temperature_2m_max"] = daily_temperature_2m_max
         #daily_data["temperature_2m_min"] = daily_temperature_2m_min
 
@@ -200,13 +200,15 @@ def climatology_build(weather_per_location, lat_list, lon_list, prod):
         intense_rain_day.index = intense_rain_day.index.year.astype("int")
         intense_rain_day = intense_rain_day.rename(columns={"weather_code":"intense_rain_days"})
 
+
         #creating the final dataframe for the location
         weather_total = pd.concat([weather_grouped, yearly_rain_day,intense_rain_day], axis=1)
-        weather_total["dry_season_weighted"] = weather_total["dry_season"] * prod[locations]/sum(prod)  #weather_total["location_weight"]
-        weather_total["rain_season_weighted"] = weather_total["rain_season"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
-        weather_total["total_rain_year_weighted"] = weather_total["total_year_rain"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
-        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * prod[locations]/sum(prod)   #weather_total["location_weight"]
+        weather_total["dry_season_weighted"] = weather_total["dry_season"] * (prod[locations]/sum(prod))  #weather_total["location_weight"]
+        weather_total["rain_season_weighted"] = weather_total["rain_season"] * (prod[locations]/sum(prod))   #weather_total["location_weight"]
+        weather_total["total_year_rain_weighted"] = weather_total["total_year_rain"] * (prod[locations]/sum(prod))   #weather_total["location_weight"]
+        weather_total["intense_rain_days_weighted"] = weather_total["intense_rain_days"] * (prod[locations]/sum(prod))   #weather_total["location_weight"]
         #possible to weight the number of rain days
+        print(prod)
 
         #concatenating into the country dataframe with details per GPS point
         country_weather = pd.concat([country_weather,weather_total])
@@ -214,7 +216,7 @@ def climatology_build(weather_per_location, lat_list, lon_list, prod):
         #building a summary dataframe for climatology per year
         country_weather_dry_season = country_weather.groupby(country_weather.index)['dry_season_weighted'].sum()
         country_weather_rain_season = country_weather.groupby(country_weather.index)['rain_season_weighted'].sum()
-        country_weather_rain = country_weather.groupby(country_weather.index)['total_rain_year_weighted'].sum()
+        country_weather_rain = country_weather.groupby(country_weather.index)['total_year_rain_weighted'].sum()
         country_weather_rain_days = country_weather.groupby(country_weather.index)['rain_days'].mean()
         country_weather_intense_rain = country_weather.groupby(country_weather.index)['intense_rain_days_weighted'].mean()
         country_climatology = pd.concat([country_weather_dry_season, country_weather_rain_season,country_weather_rain,country_weather_rain_days,country_weather_intense_rain], axis=1)
@@ -231,7 +233,7 @@ def save_load_climatology(save:bool=True, country:str='CIV', sample_weight:float
             print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} saved")
     else :
         if cache_path.is_file():
-            climat = pd.read_csv(cache_path)
+            climat = pd.read_csv(cache_path,index_col=[0])
             print(f"✅ climatology of weight {sample_weight} from {min_date} to {max_date} loaded")
             return climat
     return pd.DataFrame()
