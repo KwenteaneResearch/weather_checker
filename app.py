@@ -6,9 +6,8 @@ import pandas as pd
 import requests
 from pathlib import Path
 
-'''
-# Weather checker Streamlit frontend
-'''
+st.markdown('# Climatology Classifier for Top Cocoa Producers')
+st.markdown('## Selected crop for the project: cocoa')
 
 market_reports_date = datetime.date.today() - datetime.timedelta(days=8*365+2)
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
@@ -23,21 +22,23 @@ if (Path(country_data_path).is_file()):
     default_country_index = 0
     if(country_df.size > 10):
         default_country_index = 10 # "Côte d'Ivoire"
-    country = st.selectbox(
-        'Select a country',
-        country_df,
-        index = default_country_index)
+    percentage = 10
+    col1, col2 = st.columns(2)
+    with col1:
+        country = st.selectbox(
+            'Select a cocoa producer country',
+            country_df,
+            index = default_country_index)
+    with col2:
+        market_reports_date = st.date_input(
+        "Market report summary for the month",
+        market_reports_date)
 
-percentage = 10
 col1, col2 = st.columns(2)
 with col1:
-    percentage = st.slider("Select percentage of country's production", 0, 10, percentage, 1, "%d%%")
+    percentage = st.slider("Select percentage of country's cocoa production", 0, 100, percentage, 1, "%d%%")
 with col2:
-    market_reports_date = st.date_input(
-    "Market report summary for the month",
-    market_reports_date)
-
-run_openai = st.checkbox('Run OpenAI reports')
+    run_openai = st.checkbox('Run OpenAI reports')
 
 url_location = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/collect_locations'
 url_climatology = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/compute_climatology'
@@ -54,12 +55,8 @@ if st.button('Get climate!'):
 
     response = requests.get(url_location, params=params)
     if(response.status_code == 200):
-        # longitude = response.json()['longitude']
-        # latitude = response.json()['latitude']
-        # st.markdown(f"{response.json()}")
         st.markdown(f'### Top {percentage}% production locations in {country}:')
         st.map(pd.DataFrame.from_dict(response.json()))
-        # st.markdown(f"{longitude}")
 
     response = requests.get(url_climatology, params=params)
     if(response.status_code == 200):
