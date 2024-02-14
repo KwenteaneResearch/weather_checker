@@ -15,6 +15,7 @@ top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_locat
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 openai_api_key = st.secrets['openai_api_key']
 
+
 if (Path(country_data_path).is_file()):
     country_df = pd.read_csv(country_data_path)
     country_df = country_df[country_df.region == 'Africa'].copy()
@@ -58,7 +59,12 @@ with col2:
     'To',
     to_date)
 
-url = 'https://taxifare.lewagon.ai/predict'
+url_location = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/collect_locations'
+# url_location = 'http://localhost:8000/collect_locations'
+url_climatology = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/compute_climatology'
+url_years = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/years_classification'
+# url_years = 'localhost:8000/years_classification'
+url_monthly_summary = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/get_monthly_summary'
 
 # if url == 'https://taxifare.lewagon.ai/predict':
 
@@ -69,9 +75,21 @@ if st.button('Get climate!'):
               "from_date": from_date.strftime("%Y-%m-%d"),
               "to_date": to_date.strftime("%Y-%m-%d"),
               "openai_api_key": openai_api_key,
-              "sample_weight": percentage,
+              "sample_weight": percentage/100,
               "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
-    response = requests.get(url, params=params)
-    st.write(f'Status code {response.status_code}')
-    st.markdown(f"# $ {response.json()['fare']:.2f}")
+    response = requests.get(url_location, params=params)
+    # st.write(f'Status code {response.status_code}')
+    st.markdown(f"{response.json()}")
+
+    response = requests.get(url_climatology, params=params)
+    # st.write(f'Status code {response.status_code}')
+    st.markdown(f"{response.json()}")
+
+    response = requests.get(url_years, params=params)
+    # st.write(f'Status code {response.status_code}')
+    st.markdown(f"{response.json()}")
+
+    response = requests.get(url_monthly_summary, params=params)
+    # st.write(f'Status code {response.status_code}')
+    st.markdown(f"{response.json()}")
