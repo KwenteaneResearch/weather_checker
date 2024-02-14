@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import datetime
+import numpy as np
 import pandas as pd
 import requests
 from pathlib import Path
@@ -9,8 +10,7 @@ from pathlib import Path
 # Weather checker Streamlit frontend
 '''
 
-from_date = datetime.date.today()
-to_date = datetime.datetime.today()
+market_reports_date = datetime.date.today() - datetime.timedelta(days=8*365+2)
 top_location_by_country_path = os.path.join(os.getcwd(), 'input_csv', 'top_location_by_country', )
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
 openai_api_key = st.secrets['openai_api_key']
@@ -21,58 +21,64 @@ if (Path(country_data_path).is_file()):
     country_df = country_df[country_df.region == 'Africa'].copy()
     country_df = country_df.sort_values(by = 'name')[['name', 'alpha-3']]
 
+    default_country_index = 0
+    if(country_df.size > 14):
+        default_country_index = 14 # "Côte d'Ivoire"
     country = st.selectbox(
         'Select a country',
-        country_df)
-
-    st.write('You selected:', country_df[country_df.name == country]['alpha-3'].values[0])
+        country_df,
+        index = default_country_index)
 
 percentage = 10
-percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
-
-weather_events = ['Strong', 'Average daily temperature', 'Precipitation']
-weather_event_codes = ['weather_code', 'temperature_2m_mean', 'precipitation_sum']
-weather_event = st.selectbox(
-    'Select weather event intensity',
-    weather_events)
-st.write('You selected:', weather_event_codes[weather_events.index(weather_event)])
-
-
-path = os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.7.csv')
-if (percentage <= 7):
-   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.07.csv')
-elif (percentage <= 11):
-   path =  os.path.join(top_location_by_country_path,  'gps_weight_CIV_0.11.csv')
-
-if (Path(path).is_file()):
-    top_producers_df = pd.read_csv(path)
-    st.map(top_producers_df)
-
-st.write('Select climatology range')
 col1, col2 = st.columns(2)
 with col1:
-    from_date = st.date_input(
-    "From",
-    from_date)
+    percentage = st.slider("Select percentage of country's production", 0, 100, percentage, 1, "%d%%")
 with col2:
-    to_date = st.date_input(
-    'To',
-    to_date)
+    market_reports_date = st.date_input(
+    "Market report summary for the month",
+    market_reports_date)
 
-url = 'https://taxifare.lewagon.ai/predict'
-
-# if url == 'https://taxifare.lewagon.ai/predict':
-
-    # st.markdown('Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...')
+url_location = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/collect_locations'
+url_climatology = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/compute_climatology'
+url_years = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/years_classification'
+url_monthly_summary = 'https://weather-checker-ddzfwilp7q-ew.a.run.app/get_monthly_summary'
 
 if st.button('Get climate!'):
     params = {"country_code": country_df[country_df.name == country]['alpha-3'].values[0],
-              "from_date": from_date.strftime("%Y-%m-%d"),
-              "to_date": to_date.strftime("%Y-%m-%d"),
+              "year": market_reports_date.year,
+              "month": f'{market_reports_date.month:02d}',
               "openai_api_key": openai_api_key,
-              "sample_weight": percentage,
-              "weather_event": weather_event_codes[weather_events.index(weather_event)]
+              "sample_weight": percentage/100
     }
-    response = requests.get(url, params=params)
-    st.write(f'Status code {response.status_code}')
-    st.markdown(f"# $ {response.json()['fare']:.2f}")
+
+    response = requests.get(url_location, params=params)
+    if(response.status_code == 200):
+        # longitude = response.json()['longitude']
+        # latitude = response.json()['latitude']
+        # st.markdown(f"{response.json()}")
+        st.markdown(f'### Top {percentage}% production locations in {country}:')
+        st.map(pd.DataFrame.from_dict(response.json()))
+        # st.markdown(f"{longitude}")
+
+    response = requests.get(url_climatology, params=params)
+    if(response.status_code == 200):
+        st.markdown(f'### Climatology for top {percentage}% production locations in {country}:')
+        st.markdown(f"{response.json()['climatology']}")
+
+    response = requests.get(url_years, params=params)
+    if(response.status_code == 200):
+        st.markdown(f'### Classifying the years and identifying outliers:')
+        st.markdown(f'#### Analog years:')
+        for element in response.json()['families_of_years']:
+            for el in element:
+                st.write(f'{el} -> {element[str(el)]}')
+        st.markdown(f'#### family_rain_season_rainfall:')
+        for element in response.json()['family_rain_season_rainfall']:
+            st.write(f"{element} -> {response.json()['family_rain_season_rainfall'][str(element)]}")
+        st.markdown(f'#### Outlier years:')
+        st.markdown(f"{response.json()['outlier_years']}")
+
+    # response = requests.get(url_monthly_summary, params=params)
+    if(response.status_code == 200):
+        st.markdown(f'### Weather reports for {market_reports_date.strftime("%B %Y")} summarized by OpenAI:')
+        st.markdown(f"{response.json()['monthly_summary']}")
