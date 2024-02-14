@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import datetime
+import numpy as np
 import pandas as pd
 import requests
 from pathlib import Path
@@ -76,18 +77,34 @@ if st.button('Get climate!'):
               "sample_weight": percentage/100
             #   "weather_event": weather_event_codes[weather_events.index(weather_event)]
     }
-    response = requests.get(url_location, params=params)
-    if(response.status_code == 200):
-        st.markdown(f"{response.json()}")
+    # response = requests.get(url_location, params=params)
+    # if(response.status_code == 200):
+    #     # longitude = response.json()['longitude']
+    #     # latitude = response.json()['latitude']
+    #     # st.markdown(f"{response.json()}")
+    #     st.markdown(f'### Top {percentage}% production locations in {country}:')
+    #     st.map(pd.DataFrame.from_dict(response.json()))
+    #     # st.markdown(f"{longitude}")
 
-    response = requests.get(url_climatology, params=params)
-    if(response.status_code == 200):
-        st.markdown(f"{response.json()}")
+    # response = requests.get(url_climatology, params=params)
+    # if(response.status_code == 200):
+    #     st.markdown(f'### Climatology for top {percentage}% production locations in {country}:')
+    #     st.markdown(f"{response.json()['climatology']}")
 
     response = requests.get(url_years, params=params)
     if(response.status_code == 200):
-        st.markdown(f"{response.json()}")
+        st.markdown(f'### Classifying the years and identifying outliers:')
+        st.markdown(f'#### Analog years:')
+        for element in response.json()['families_of_years']:
+            for el in element:
+                st.write(f'{el} -> {element[str(el)]}')
+        st.markdown(f'#### family_rain_season_rainfall:')
+        for element in response.json()['family_rain_season_rainfall']:
+            st.write(f"{element} -> {response.json()['family_rain_season_rainfall'][str(element)]}")
+        st.markdown(f'#### Outlier years:')
+        st.markdown(f"{response.json()['outlier_years']}")
 
     response = requests.get(url_monthly_summary, params=params)
     if(response.status_code == 200):
+        st.markdown(f'### Weather reports for {market_reports_date} summarized by OpenAI:')
         st.markdown(f"{response.json()['monthly_summary']}")
