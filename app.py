@@ -60,7 +60,7 @@ if st.button('Get climate!'):
 
     response = requests.get(url_climatology, params=params)
     if(response.status_code == 200):
-        st.markdown(f'### Precipitation climatology for top {percentage}% production locations in {country}:')
+        st.markdown(f'### Precipitation climatology for sampled locations in {country}:')
         if 'Incorrect input sample_weight' in response.json():
             st.markdown(f"{response.json()['Incorrect input sample_weight']}")
         st.markdown(f"{response.json()['climatology']}")
