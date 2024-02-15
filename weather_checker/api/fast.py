@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from weather_checker.interface.main import *
 from weather_checker.nlp.report_summary import *
+from weather_checker.params import *
 
 
 """
@@ -49,11 +50,13 @@ def climatology(country_code:str='CIV', sample_weight:float=0.1):
     """
     # Fallbacks
     errors = {}
-    country_list = ["AGO","BEN","BFA","CAF","CIV","CMR","COD","COG","GAB","GHA","GIN","GNQ","LBR","MDG","NGA","SLE","SSD","STP","TGO","TZA","UGA","ZMB"]
-    if country_code not in country_list:
-        errors["Incorrect input country_code"] = f"{country_code} not in list {country_list}"
-    if sample_weight > 0.1 :
-        errors["Incorrect input sample_weight"] = f"{sample_weight} should not be above 0.1 as we only cover 10% max of countries locations"
+    if country_code not in COUNTRY_MAX_PERCENT:
+        errors["Incorrect input country_code"] = f"{country_code} not in list {COUNTRY_MAX_PERCENT.keys()}"
+    else :
+        if sample_weight > COUNTRY_MAX_PERCENT[country_code] :
+            climat, returned_weight = get_climatology(country_code,COUNTRY_MAX_PERCENT[country_code])
+            return {"Incorrect input sample_weight":f"{sample_weight} should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {country_code}",
+                    "climatology": f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
     if len(errors) > 0:
         return errors
@@ -68,12 +71,15 @@ def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
     """
     # Fallbacks
     errors = {}
-    country_list = ["AGO","BEN","BFA","CAF","CIV","CMR","COD","COG","GAB","GHA","GIN","GNQ","LBR","MDG","NGA","SLE","SSD","STP","TGO","TZA","UGA","ZMB"]
-    if country_code not in country_list:
-        errors["Incorrect input country_code"] = f"{country_code} not in list {country_list}"
-    if sample_weight > 0.1 :
-        errors["Incorrect input sample_weight"] = f"{sample_weight} should not be above 0.1 as we only cover 10% max of countries locations"
-
+    if country_code not in COUNTRY_MAX_PERCENT:
+        errors["Incorrect input country_code"] = f"{country_code} not in list {COUNTRY_MAX_PERCENT.keys()}"
+    else :
+        if sample_weight > COUNTRY_MAX_PERCENT[country_code] :
+            year_groups, weather_metric = analog_years(country_code,COUNTRY_MAX_PERCENT[country_code])
+            cocoa_years_outliers = outliers(country_code,COUNTRY_MAX_PERCENT[country_code])
+            return {"Incorrect input sample_weight":f"{sample_weight} should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {country_code}",
+                    "families_of_years":year_groups,"family_rain_season_rainfall":weather_metric,"outlier_years":cocoa_years_outliers}
+ 
     if len(errors) > 0:
         return errors
     else :
@@ -106,3 +112,9 @@ def get_reports(openai_api_key:str, year:int=2016, month:str="02"):
 @app.get("/")
 def root():
     return {'Hello': 'world !'}
+
+
+
+if __name__ == '__main__':
+    #print(climatology(country_code='CIV', sample_weight=0.5))
+    print(regroup_years(country_code='C6546', sample_weight=0.5))

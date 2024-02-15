@@ -22,6 +22,29 @@ COUNTRY_PRODUCTION = {"CIV":1879953.901,
                       "rest":177288.60,
                       "all":3569999.503}
 
+COUNTRY_MAX_PERCENT={"CIV":0.1195,
+                    "GHA":0.3053,
+                    "NGA":0.1265,
+                    "CMR":0.2878,
+                    "SLE":0.3153,
+                    "TGO":0.1061,
+                    "UGA":0.1128,
+                    "GIN":0.1004,
+                    "MDG":0.6384,
+                    "TZA":0.9721,
+                    "LBR":0.2187,
+                    "COD":0.3011,
+                    "COG":0.1466,
+                    "STP":1,
+                    "GAB":0.9374,
+                    "GNQ":0.1705,
+                    "AGO":0.2075,
+                    "CAF":0.13,
+                    "BEN":1,
+                    "SSD":1,
+                    "BFA":1,
+                    "ZMB":1}
+
 # Geo Data Params
 # Percentage of cumulative weight processed
 DATA_SIZE = 0.05
