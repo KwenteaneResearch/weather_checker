@@ -15,7 +15,7 @@ def compute_csv_files():
     if all_gps.is_file():
         gps_df = pd.read_csv(all_gps)
     #print(gps_df.info())
-    dict_group_10 = {"CIV":241,"GHA":107,"NGA":96,"CMR":111,"REST":655}
+    dict_group_10 = {"CIV":241,"GHA":108,"NGA":96,"CMR":111,"SLE":44,"TGO":26,"UGA":87,"GIN":57,"MDG":9,"TZA":2,"LBR":22,"COD":208,"COG":107,"STP":2,"GAB":9,"GNQ":24,"AGO":35,"CAF":37,"BEN":1,"SSD":1,"BFA":1,"ZMB":1}
 
     for k, v in dict_group_10.items():
         gps_country = gps_df[gps_df['country'] == k]
