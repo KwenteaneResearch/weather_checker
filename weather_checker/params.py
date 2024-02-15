@@ -15,12 +15,28 @@ RAW_DATA_PATH = os.path.join(os.getcwd(), "raw_data")
 
 METEO_COLUMNS_DAILY = ["weather_code","precipitation_sum"] #"temperature_2m_mean"
 
-COUNTRY_PRODUCTION = {"CIV":1879953.901,
-                      "GHA":895249.9013,
-                      "NGA":318102.2002,
-                      "CMR":299404.9002,
-                      "rest":177288.60,
-                      "all":3569999.503}
+COUNTRY_PRODUCTION = {"CIV":1879953.9012,
+                    "GHA":895249.9013,
+                    "NGA":318102.2001,
+                    "CMR":299404.9001,
+                    "SLE":48671.6,
+                    "TGO":42369.2,
+                    "UGA":28079.9,
+                    "GIN":17018.5,
+                    "MDG":11080.1,
+                    "TZA":8524.8,
+                    "LBR":8056.6999,
+                    "COD":3957.2,
+                    "COG":3701.4,
+                    "STP":3172.7,
+                    "GAB":1241.7999,
+                    "GNQ":689.5,
+                    "AGO":444.2,
+                    "CAF":115.3,
+                    "BEN":113.0999,
+                    "SSD":29.9999,
+                    "BFA":11.1,
+                    "ZMB":6.7999}
 
 COUNTRY_MAX_PERCENT={"CIV":0.1195,
                     "GHA":0.3053,
