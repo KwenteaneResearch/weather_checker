@@ -61,6 +61,29 @@ COUNTRY_MAX_PERCENT={"CIV":0.1195,
                     "BFA":1,
                     "ZMB":1}
 
+COUNTRY_NAMES={"AGO":"Angola",
+                "BEN":"Benin",
+                "BFA":"Burkina Faso",
+                "CMR":"Cameroon",
+                "CAF":"Central African Republic",
+                "COD":"Democratic Republic of the Congo",
+                "CIV":"Ivory Coast",
+                "GNQ":"Equatorial Guinea",
+                "GAB":"Gabon",
+                "GHA":"Ghana",
+                "GIN":"Guinea",
+                "LBR":"Liberia",
+                "MDG":"Madagascar",
+                "NGA":"Nigeria",
+                "STP":"Sao Tome and Principe",
+                "SEN":"Senegal",
+                "SLE":"Sierra Leone",
+                "TZA":"Tanzania",
+                "TGO":"Togo",
+                "UGA":"Uganda",
+                "ZMB":"Zambia",
+                "ZWE":"Zimbabwe"}
+
 # Geo Data Params
 # Percentage of cumulative weight processed
 DATA_SIZE = 0.05
