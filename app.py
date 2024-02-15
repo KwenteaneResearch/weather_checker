@@ -60,19 +60,39 @@ if st.button('Get climate!'):
 
     response = requests.get(url_climatology, params=params)
     if(response.status_code == 200):
-        st.markdown(f'### Precipitation climatology for top {percentage}% production locations in {country}:')
+        st.markdown(f'### Precipitation climatology for sampled locations in {country}:')
+        if 'Incorrect input sample_weight' in response.json():
+            st.markdown(f"{response.json()['Incorrect input sample_weight']}")
         st.markdown(f"{response.json()['climatology']}")
 
     response = requests.get(url_years, params=params)
     if(response.status_code == 200):
+        series_list = []
         st.markdown(f'### Classifying the years and identifying outliers:')
         st.markdown(f'#### Analog years:')
         for element in response.json()['families_of_years']:
             for el in element:
-                st.write(f'{el} -> {element[str(el)]}')
+                # st.write(f'{el} -> {element[str(el)]}')
+                new_line = pd.Series(' '.join(str(x) for x in element[str(el)]), name=el)
+                series_list.append(new_line)
+        years_df = pd.DataFrame(series_list)
+        years_df.rename(columns = {0: 'Analog years'}, inplace=True)
+        st.table(years_df)
+
+        series_list = []
         st.markdown(f'#### Total rain season rainfall (mm) for each analog group:')
         for element in response.json()['family_rain_season_rainfall']:
-            st.write(f"{element} -> {response.json()['family_rain_season_rainfall'][str(element)]}")
+            # st.write(f"{element} -> {response.json()['family_rain_season_rainfall'][str(element)]}")
+            new_line = pd.Series(response.json()['family_rain_season_rainfall'][str(element)], name=element)
+            series_list.append(new_line)
+        perception_df = pd.DataFrame(series_list)
+        perception_df.rename(columns = {0: 'Precipitation in mm'}, inplace=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.table(perception_df)
+        with col2:
+            st.write('')
+
         st.markdown(f'#### Outlier years based on precipitation amount and intensity:')
         st.markdown(f"{response.json()['outlier_years']}")
 
