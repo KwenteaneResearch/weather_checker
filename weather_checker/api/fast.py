@@ -112,3 +112,9 @@ def get_reports(openai_api_key:str, year:int=2016, month:str="02"):
 @app.get("/")
 def root():
     return {'Hello': 'world !'}
+
+
+
+if __name__ == '__main__':
+    #print(climatology(country_code='CIV', sample_weight=0.5))
+    print(regroup_years(country_code='C6546', sample_weight=0.5))
