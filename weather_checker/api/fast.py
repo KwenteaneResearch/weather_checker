@@ -55,14 +55,14 @@ def climatology(country_code:str='CIV', sample_weight:float=0.1):
     else :
         if sample_weight > COUNTRY_MAX_PERCENT[country_code] :
             climat, returned_weight = get_climatology(country_code,COUNTRY_MAX_PERCENT[country_code])
-            return {"Incorrect input sample_weight":f"{sample_weight} should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {country_code}",
-                    "climatology": f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
+            return {"Incorrect input sample_weight":f"{np.round(sample_weight,4)*100}% should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {COUNTRY_NAMES[country_code]}",
+                    "climatology": f"Climatology calculated from daily data for {COUNTRY_NAMES[country_code]} on {np.round(returned_weight,4)*100}% of its cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
     if len(errors) > 0:
         return errors
     else :
         climat, returned_weight = get_climatology(country_code,sample_weight)
-        return {"climatology": f"climatology calculated from daily data for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
+        return {"climatology": f"Climatology calculated from daily data for {COUNTRY_NAMES[country_code]} on {np.round(returned_weight,4)*100}% of its cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
 @app.get("/years_classification")
 def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
@@ -77,7 +77,7 @@ def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
         if sample_weight > COUNTRY_MAX_PERCENT[country_code] :
             year_groups, weather_metric = analog_years(country_code,COUNTRY_MAX_PERCENT[country_code])
             cocoa_years_outliers = outliers(country_code,COUNTRY_MAX_PERCENT[country_code])
-            return {"Incorrect input sample_weight":f"{sample_weight} should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {country_code}",
+            return {"Incorrect input sample_weight":f"{sample_weight*100}% should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {COUNTRY_NAMES[country_code]}",
                     "families_of_years":year_groups,"family_rain_season_rainfall":weather_metric,"outlier_years":cocoa_years_outliers}
  
     if len(errors) > 0:
