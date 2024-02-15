@@ -62,7 +62,7 @@ def climatology(country_code:str='CIV', sample_weight:float=0.1):
         return errors
     else :
         climat, returned_weight = get_climatology(country_code,sample_weight)
-        return {"climatology": f"climatology done for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
+        return {"climatology": f"climatology calculated from daily data for {country_code} on {np.round(returned_weight,6)*100}% of the cocoa production from {min(climat.index)} to {max(climat.index)}"}
 
 @app.get("/years_classification")
 def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
@@ -79,7 +79,7 @@ def regroup_years(country_code:str='CIV',sample_weight:float=0.1):
             cocoa_years_outliers = outliers(country_code,COUNTRY_MAX_PERCENT[country_code])
             return {"Incorrect input sample_weight":f"{sample_weight} should not be above {COUNTRY_MAX_PERCENT[country_code]*100}% for {country_code}",
                     "families_of_years":year_groups,"family_rain_season_rainfall":weather_metric,"outlier_years":cocoa_years_outliers}
-    
+ 
     if len(errors) > 0:
         return errors
     else :
@@ -101,7 +101,7 @@ def get_reports(openai_api_key:str, year:int=2016, month:str="02"):
     month_list = ["01","02","03","04","05","06","07","08","09","10","11","12"]
     if month not in month_list:
         errors["Incorrect input month"] = f"{month} not in list {month_list}"
-    
+
     if len(errors) > 0:
         return errors
     else :

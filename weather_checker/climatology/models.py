@@ -33,25 +33,31 @@ def analog_years (country_code:str='CIV',sample_weight:float=0.1):
     cocoa_similar_years["year_group"] = km.labels_
     year_family = cocoa_similar_years.groupby('year_group')
     year_family = year_family.groups
-    year_family_list = [{k:list(v)} for k,v in year_family.items()]
+    year_family_list = [{f"Group {k}":list(v)} for k,v in year_family.items()]
 
     #print(year_family)
     print(year_family_list)
 
-    #associating a weather metric to each family
+    #associating the total rain season rainfall weather metric to each family
     weather_classification_dict = {}
     for i in range(len(year_family)):
         crop_years = list(year_family.keys())[i]
         rain_season_type = cocoa_similar_years[cocoa_similar_years.index.isin(year_family[crop_years])]
-        weather_classification_dict[i] = rain_season_type["rain_season_weighted"].mean()
+        weather_classification_dict[i] = round(rain_season_type["rain_season_weighted"].mean())
         #weather_classification_list = [(k,v) for k,v in weather_classification_dict.items()]
-    print(weather_classification_dict)
-    #print(weather_classification_list)
 
-    #returning the two lists
-    return year_family_list, weather_classification_dict #year_family
+    #renaming the keys of the dictionary adding "Group"
+    rain_season_cumul = {}
+    for key in weather_classification_dict:
+        rain_season_cumul[f"Group {key}"] = weather_classification_dict[key]
 
+    #sorting the dictionary by descending total rainfall within the dictionary
+    sorting_rain = sorted(rain_season_cumul.items(), key=lambda x:x[1], reverse=True)
+    sorted_rain_season = dict(sorting_rain)
+    print(sorted_rain_season)
 
+    #returning the list of analogs and the dictionary for rain season rainfall for each family
+    return year_family_list, sorted_rain_season #year_family
 
 def outliers(country_code:str='CIV',sample_weight:float=0.1):
 
@@ -81,3 +87,7 @@ def outliers(country_code:str='CIV',sample_weight:float=0.1):
 
     print(cocoa_years_outliers)
     return cocoa_years_outliers
+
+if __name__ == '__main__':
+    #compute_csv_files()
+    analog_years()
