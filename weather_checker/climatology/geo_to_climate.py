@@ -4,7 +4,7 @@ import requests_cache
 import numpy as np
 import pandas as pd
 from retry_requests import retry
-import json
+
 import time
 
 from colorama import Fore, Style
@@ -169,7 +169,7 @@ def api_gps_location_to_weather(lat_list:list, lon_list:list, prod_list:list, ra
 #Building a country climatology from all gps locations
 def climatology_build(weather_per_location, lat_list, lon_list, prod):
     if len(lat_list) != len(lon_list) or len(lon_list) != len(prod):
-        print(f"❌ climatology_build function doesn't have same lenght for lat_list:{len(lat_list)}, lon_list:{len(lat_list)} and weights:{len(prod)}")
+        print(f"❌ climatology_build function doesn't have same length for lat_list:{len(lat_list)}, lon_list:{len(lat_list)} and weights:{len(prod)}")
         return None
 
 
