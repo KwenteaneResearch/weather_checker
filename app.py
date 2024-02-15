@@ -6,8 +6,8 @@ import pandas as pd
 import requests
 from pathlib import Path
 
-st.markdown('# Climatology Classifier for Top Cocoa Producers')
-st.markdown('## Selected crop for the project: cocoa')
+st.markdown('# Climatology Classifier for Cocoa Producing Countries in West Africa')
+st.markdown('## Cocoa is a tree crop depending heavily on rainfall')
 
 market_reports_date = datetime.date.today() - datetime.timedelta(days=8*365+2)
 country_data_path = os.path.join(os.getcwd(), 'input_csv', 'country_codes', 'all.csv')
